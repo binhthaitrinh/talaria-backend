@@ -7,10 +7,10 @@ export interface IUser {
   profilePicture: string;
   role: string;
   password: string;
-  passwordConfirm: string;
-  passwordChangedAt?: Date;
+  passwordConfirm?: string;
+  passwordChangedAt?: number;
   passwordResetToken?: string;
-  passwordResetExpires?: Date;
+  passwordResetExpires?: number;
   active?: boolean;
 }
 

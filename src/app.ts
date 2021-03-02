@@ -1,5 +1,7 @@
 import express from "express";
 import { User } from "./models/users/users.model";
+import userRouter from "./routes/userRoutes";
+import { errorHandler } from "./controllers/errorController";
 
 const app = express();
 
@@ -20,5 +22,9 @@ app.get("/", async (_req, res, _next) => {
   }
   res.send("Hello");
 });
+
+app.use("/api/v1/users", userRouter);
+
+app.use(errorHandler);
 
 export default app;
