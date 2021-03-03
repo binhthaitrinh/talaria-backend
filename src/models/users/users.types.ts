@@ -14,6 +14,11 @@ export interface IUser {
   active?: boolean;
 }
 
-export interface IUserDocument extends IUser, Document {}
+export interface IUserDocument extends IUser, Document {
+  comparePassword: (
+    this: IUserDocument,
+    candidatePassword: string
+  ) => Promise<boolean>;
+}
 
 export interface IUserModel extends Model<IUserDocument> {}

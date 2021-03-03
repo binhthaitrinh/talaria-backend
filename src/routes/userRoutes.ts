@@ -1,9 +1,9 @@
 import express from "express";
-import { sign } from "jsonwebtoken";
-import { signup } from "../controllers/authController";
+import { signin, signup } from "../controllers/authController";
 
 const userRouter = express.Router();
 
 userRouter.post("/signup", signup);
+userRouter.post("/signin", signin);
 
 export default userRouter;

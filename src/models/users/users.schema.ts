@@ -1,9 +1,10 @@
 import { Schema } from "mongoose";
 import validator from "validator";
-import { IUser, IUserDocument } from "./users.types";
+import { IUser, IUserDocument, IUserModel } from "./users.types";
 import bcrypt from "bcrypt";
+import { comparePassword } from "./users.methods";
 
-const userSchema = new Schema({
+const userSchema = new Schema<IUserDocument, IUserModel>({
   firstName: {
     type: String,
     required: [true, "User must have a first name"],
@@ -68,5 +69,7 @@ userSchema.pre<IUserDocument>("save", function (next) {
   this.passwordChangedAt = Date.now() - 1000;
   next();
 });
+
+userSchema.methods.comparePassword = comparePassword;
 
 export default userSchema;
