@@ -1,16 +1,46 @@
 import { NextFunction, Request, Response } from "express";
+import jwt from "jsonwebtoken";
+import { IUserDocument } from "src/models/users/users.types";
 import { User } from "../models/users/users.model";
 import { catchAsync } from "../utils/catchAsync";
+
+const signToken = (id: string) => {
+  return jwt.sign({ id }, <string>process.env.JWT_SECRET, {
+    expiresIn: process.env.JWT_EXPIRES_IN,
+  });
+};
+
+const createSendToken = (
+  user: IUserDocument,
+  statusCode: number,
+  res: Response
+) => {
+  const token = signToken(user._id);
+  const cookieOptions = {
+    expires: new Date(
+      Date.now() +
+        parseInt(process.env.JWT_COOKIE_EXPIRES_IN!) * 24 * 60 * 60 * 1000
+    ),
+    // only send cookie on https
+    secure: process.env.NODE_ENV === "production" ? true : false,
+    httpOnly: true,
+  };
+
+  res.cookie("jwt", token, cookieOptions);
+  user.password = undefined;
+  res.status(statusCode).json({
+    status: "success",
+    token,
+    data: {
+      user,
+    },
+  });
+};
 
 export const signup = catchAsync(
   async (req: Request, res: Response, _next: NextFunction) => {
     //   await User.deleteMany({});
     const newUser = await User.create(req.body);
-    res.status(201).json({
-      status: "success",
-      data: {
-        newUser,
-      },
-    });
+    createSendToken(newUser, 201, res);
   }
 );

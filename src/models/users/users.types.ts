@@ -6,7 +6,7 @@ export interface IUser {
   email: string;
   profilePicture: string;
   role: string;
-  password: string;
+  password?: string;
   passwordConfirm?: string;
   passwordChangedAt?: number;
   passwordResetToken?: string;
