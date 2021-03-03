@@ -1,8 +1,13 @@
 import dotenv from "dotenv";
 import mongoose from "mongoose";
 import app from "./app";
-
 dotenv.config();
+
+process.on("uncaughtException", (err: Error) => {
+  console.error(err.name, err.message);
+  console.log("UNCAUGHT EXCEPTION. SHUTTING DOWN...");
+  process.exit(1);
+});
 
 const DB: string = <string>(
   process.env.MONGO_URI?.replace(
@@ -23,6 +28,14 @@ mongoose
 
 const PORT = process.env.PORT || 4444;
 
-app.listen(PORT, () => {
+const server = app.listen(PORT, () => {
   console.log(`Listening on port ${PORT}`);
+});
+
+process.on("unhandledRejection", (err: Error) => {
+  console.error(err.name, err.message);
+  console.log("UNHANDLER REJECTION! Shutting down...");
+  server.close(() => {
+    process.exit(1);
+  });
 });
