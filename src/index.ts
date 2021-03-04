@@ -1,3 +1,4 @@
+import redis, { Redis } from "ioredis";
 import dotenv from "dotenv";
 import mongoose from "mongoose";
 import app from "./app";
@@ -39,3 +40,17 @@ process.on("unhandledRejection", (err: Error) => {
     process.exit(1);
   });
 });
+
+global.redisClient = new redis();
+
+declare global {
+  namespace NodeJS {
+    interface Global {
+      redisClient: Redis;
+    }
+  }
+
+  namespace globalThis {
+    const redisClient: Redis;
+  }
+}
