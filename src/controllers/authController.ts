@@ -1,12 +1,13 @@
 import { NextFunction, Request, Response } from "express";
 import jwt from "jsonwebtoken";
-import { IUserDocument } from "src/models/users/users.types";
+import { IUser, IUserDocument } from "src/models/users/users.types";
 import { User } from "../models/users/users.model";
 import AppError from "../utils/AppError";
 import { catchAsync } from "../utils/catchAsync";
 import { v4 } from "uuid";
 import { FORGOT_PASSWORD_PREFIX } from "../constants";
 import { Email } from "../utils/sendEmail";
+import { promisify } from "util";
 
 const signToken = (id: string) => {
   return jwt.sign({ id }, <string>process.env.JWT_SECRET, {
@@ -153,5 +154,52 @@ export const resetPassword = catchAsync(
     await user.save();
 
     createSendToken(user, 200, res);
+  }
+);
+
+export const protect = catchAsync(
+  async (
+    req: Request & { user?: IUserDocument },
+    res: Response,
+    next: NextFunction
+  ) => {
+    var token;
+    console.log(req.cookies);
+    if (req.headers.authorization?.startsWith("Bearer")) {
+      token = req.headers.authorization.split(" ")[1];
+    } else if (req.cookies?.jwt) {
+      token = req.cookies.jwt;
+    }
+
+    // user not logged in
+    if (!token) {
+      return next(
+        new AppError("You are not logged in. Please log in to get access", 401)
+      );
+    }
+
+    interface decodedType {
+      id: string;
+      iat: number;
+      exp: number;
+    }
+
+    // decode token
+    const decoded = <decodedType>jwt.verify(token, process.env.JWT_SECRET!);
+
+    const user = await User.findById(decoded.id);
+    if (!user) {
+      return next(
+        new AppError("The user belonging to this token no longer exists", 401)
+      );
+    }
+
+    // TODO: Check if password is changed after JWT was issued
+
+    // grant access to protected route
+    req.user = user;
+    res.locals.user = user;
+
+    next();
   }
 );
