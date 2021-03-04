@@ -128,3 +128,30 @@ export const forgotPassword = catchAsync(
     }
   }
 );
+
+export const resetPassword = catchAsync(
+  async (req: Request, res: Response, next: NextFunction) => {
+    // get password from form
+    const { password } = req.body;
+
+    if (!password) {
+      return next(new AppError("please provide new password", 401));
+    }
+    const { resetToken } = req.params;
+    const userId = await redisClient.get(
+      `${FORGOT_PASSWORD_PREFIX}${resetToken}`
+    );
+    const user = await User.findById(userId);
+    if (!user) {
+      return next(new AppError("Token is invalid or has expired", 400));
+    }
+
+    user.password = password;
+    user.passwordConfirm = password;
+
+    // .save() so that model will call middleware
+    await user.save();
+
+    createSendToken(user, 200, res);
+  }
+);
