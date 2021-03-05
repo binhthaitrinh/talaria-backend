@@ -4,6 +4,7 @@ import {
   protect,
   resetPassword,
   signin,
+  signout,
   signup,
 } from "../controllers/authController";
 
@@ -13,6 +14,6 @@ userRouter.post("/signup", signup);
 userRouter.post("/signin", signin);
 userRouter.post("/forgot-password", forgotPassword);
 userRouter.patch("/reset-password/:resetToken", resetPassword);
-userRouter.get("/protect", protect);
+userRouter.get("/signout", signout);
 
 export default userRouter;

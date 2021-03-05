@@ -163,6 +163,7 @@ export const protect = catchAsync(
     res: Response,
     next: NextFunction
   ) => {
+    console.log("CALLED");
     var token;
     console.log(req.cookies);
     if (req.headers.authorization?.startsWith("Bearer")) {
@@ -199,7 +200,18 @@ export const protect = catchAsync(
     // grant access to protected route
     req.user = user;
     res.locals.user = user;
-
     next();
   }
 );
+
+export const signout = (_req: Request, res: Response) => {
+  res.cookie("jwt", "loggedout", {
+    // cookie expire in 10s
+    expires: new Date(Date.now() + 10 * 1000),
+    httpOnly: true,
+  });
+
+  res.status(200).json({
+    status: "success",
+  });
+};
