@@ -1,6 +1,7 @@
 import mongoose, { Schema } from "mongoose";
+import { IAcctDocument, IAcctModel } from "./accounts.types";
 
-const accountSchema = new Schema({
+const accountSchema = new Schema<IAcctDocument, IAcctModel>({
   accountWebsite: {
     type: String,
     enum: [
