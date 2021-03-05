@@ -1,12 +1,15 @@
 import express from "express";
-import { User } from "./models/users/users.model";
 import userRouter from "./routes/userRoutes";
 import { errorHandler } from "./controllers/errorController";
 import AppError from "./utils/AppError";
+import cookieParser from "cookie-parser";
 
 const app = express();
 
 app.use(express.json());
+
+// need this to read cookies from request
+app.use(cookieParser());
 
 app.get("/", async (_req, res, _next) => {
   res.send("Hello");

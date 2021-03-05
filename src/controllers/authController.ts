@@ -7,7 +7,6 @@ import { catchAsync } from "../utils/catchAsync";
 import { v4 } from "uuid";
 import { FORGOT_PASSWORD_PREFIX } from "../constants";
 import { Email } from "../utils/sendEmail";
-import { promisify } from "util";
 
 const signToken = (id: string) => {
   return jwt.sign({ id }, <string>process.env.JWT_SECRET, {
@@ -199,7 +198,6 @@ export const protect = catchAsync(
 
     // grant access to protected route
     req.user = user;
-    res.locals.user = user;
     next();
   }
 );
