@@ -1,6 +1,7 @@
 import { catchAsync } from "../utils/catchAsync";
 import { Request, Response, NextFunction } from "express";
-import { Model } from "mongoose";
+import { Model, QueryOptions } from "mongoose";
+import AppError from "../utils/AppError";
 
 export const createOne = (Model: Model<any>) => {
   return catchAsync(
@@ -16,3 +17,30 @@ export const createOne = (Model: Model<any>) => {
     }
   );
 };
+
+export const getOne = (Model: Model<any>, options: QueryOptions) => {
+  return catchAsync(async (req: Request, res: Response, next: NextFunction) => {
+    let query = Model.findById(req.params.id);
+
+    if (options) query = query.populate(options);
+
+    const doc = await query;
+
+    if (!doc) {
+      return next(new AppError("No document found with that ID", 404));
+    }
+
+    res.status(200).json({
+      status: "success",
+      data: {
+        data: doc,
+      },
+    });
+  });
+};
+
+// export const getAll = Model => {
+//   return catchAsync(async(req: Request, res: Response, next: NextFunction) => {
+
+//   })
+// }

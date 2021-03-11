@@ -3,6 +3,7 @@ import userRouter from "./routes/userRoutes";
 import { errorHandler } from "./controllers/errorController";
 import AppError from "./utils/AppError";
 import cookieParser from "cookie-parser";
+import accountRouter from "./routes/accountRoutes";
 
 const app = express();
 
@@ -16,6 +17,7 @@ app.get("/", async (_req, res, _next) => {
 });
 
 app.use("/api/v1/users", userRouter);
+app.use("/api/v1/accounts", accountRouter);
 
 app.all("*", (req, res, next) => {
   next(new AppError(`Can't find ${req.originalUrl} on this server`, 404));
