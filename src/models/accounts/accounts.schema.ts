@@ -48,7 +48,7 @@ const accountSchema = new Schema<IAcctDocument, IAcctModel>({
   },
   customId: {
     type: String,
-    unique: true,
+    // unique: true,
   },
 });
 

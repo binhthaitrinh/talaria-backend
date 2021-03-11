@@ -2,6 +2,7 @@ import { catchAsync } from "../utils/catchAsync";
 import { Request, Response, NextFunction } from "express";
 import { Model, QueryOptions } from "mongoose";
 import AppError from "../utils/AppError";
+import APIFeatures from "../utils/APIFeatures";
 
 export const createOne = (Model: Model<any>) => {
   return catchAsync(
@@ -39,8 +40,19 @@ export const getOne = (Model: Model<any>, options: QueryOptions) => {
   });
 };
 
-// export const getAll = Model => {
-//   return catchAsync(async(req: Request, res: Response, next: NextFunction) => {
-
-//   })
-// }
+export const getAll = (Model: Model<any>) => {
+  return catchAsync(async (req: Request, res: Response, next: NextFunction) => {
+    const features = new APIFeatures(Model.find({}), req.query)
+      .filter()
+      .sort()
+      .limitFields()
+      .paginate();
+    const docs = await features.query;
+    res.status(200).json({
+      status: "success",
+      data: {
+        data: docs,
+      },
+    });
+  });
+};
