@@ -4,7 +4,7 @@ import { ICounterDocument, ICounterModel } from "./counters.types";
 const counterSchema = new Schema<ICounterDocument, ICounterModel>({
   value: {
     type: Number,
-    required: [true, "A counter must have an initial sequence value"],
+    default: 0,
   },
   modelName: {
     type: String,
