@@ -45,8 +45,8 @@ const userSchema = new Schema<IUserDocument, IUserModel>({
     },
   },
   passwordChangedAt: Date,
-  passwordResetToken: String,
-  passwordResetExpires: Date,
+  // passwordResetToken: String,
+  // passwordResetExpires: Date,
   active: {
     type: Boolean,
     default: true,

@@ -2,7 +2,7 @@ import mongoose, { Schema } from "mongoose";
 import { IAcctDocument, IAcctModel } from "./accounts.types";
 
 const accountSchema = new Schema<IAcctDocument, IAcctModel>({
-  accountWebsite: {
+  website: {
     type: String,
     enum: [
       "amazon",
@@ -14,11 +14,10 @@ const accountSchema = new Schema<IAcctDocument, IAcctModel>({
       "others",
     ],
   },
-  loginID: {
+  name: {
     type: String,
-    required: [true, "An account must have a login ID"],
+    required: [true, "An account must have a name"],
   },
-  teamviewInfo: String,
   balance: {
     type: mongoose.Types.Decimal128,
     default: 0,
@@ -28,27 +27,20 @@ const accountSchema = new Schema<IAcctDocument, IAcctModel>({
     enum: ["vnd", "usd", "btc"],
     required: [true, "An account must have currency"],
   },
-  createdAt: {
-    type: Date,
-    default: Date.now(),
-  },
-  updatedAt: {
-    type: Date,
-    default: Date.now(),
-  },
-  owned: {
-    type: Boolean,
-    default: true,
-  },
-  notes: String,
   status: {
     type: String,
     enum: ["active", "inactive", "disputing"],
     default: "active",
   },
+  createdAt: {
+    type: Date,
+    default: Date.now(),
+  },
+  updatedAt: Date,
+  notes: String,
   customId: {
     type: String,
-    // unique: true,
+    unique: true,
   },
 });
 

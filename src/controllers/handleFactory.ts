@@ -19,7 +19,7 @@ export const createOne = (Model: Model<any>) => {
   );
 };
 
-export const getOne = (Model: Model<any>, options: QueryOptions) => {
+export const getOne = (Model: Model<any>, options?: QueryOptions) => {
   return catchAsync(async (req: Request, res: Response, next: NextFunction) => {
     let query = Model.findById(req.params.id);
 

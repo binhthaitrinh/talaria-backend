@@ -1,9 +1,19 @@
 import express from "express";
-import { createAccount, getAccounts } from "../controllers/accountsController";
+import {
+  createAccount,
+  getAccounts,
+  getAccount,
+  updateAccount,
+  deleteAccount,
+} from "../controllers/accountsController";
 
 const accountRouter = express.Router();
 
-accountRouter.post("/", createAccount);
-accountRouter.get("/", getAccounts);
+accountRouter.route("/").get(getAccounts).post(createAccount);
+accountRouter
+  .route("/:id")
+  .get(getAccount)
+  .patch(updateAccount)
+  .delete(deleteAccount);
 
 export default accountRouter;
