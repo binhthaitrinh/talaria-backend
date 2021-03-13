@@ -1,4 +1,4 @@
-import { Schema } from "mongoose";
+import mongoose, { Schema } from "mongoose";
 import validator from "validator";
 import { IUser, IUserDocument, IUserModel } from "./users.types";
 import bcrypt from "bcrypt";
@@ -56,15 +56,91 @@ const userSchema = new Schema<IUserDocument, IUserModel>({
     default: Date.now(),
   },
   notes: String,
-  profile: {
-    type: Schema.Types.ObjectId,
-    required: true,
-    refPath: "role",
-  },
   role: {
     type: String,
-    enum: ["Admin", "Affiliate", "Customer"],
-    default: "Customer",
+    enum: ["admin", "affiliate", "customer"],
+    default: "customer",
+  },
+  profile: {
+    updatedAt: Date,
+    socialMedias: [
+      {
+        website: {
+          type: String,
+          enum: ["facebook", "instagram", "zalo", "twitter", "others"],
+          required: [true, "a social media must have a host"],
+        },
+        link: {
+          type: String,
+          required: [true, "a social media must have a link"],
+        },
+      },
+    ],
+    phoneNumbers: [String],
+    bankAccts: [
+      {
+        bankName: {
+          type: String,
+          required: [true, "a bank must have a name"],
+        },
+        acctNumber: {
+          type: String,
+          required: [true, "a bank account must have number"],
+        },
+        bankLocation: String,
+      },
+    ],
+    commissionRates: {
+      type: [
+        {
+          website: {
+            type: String,
+            required: [true, "commission rate must be specified for a website"],
+          },
+          rate: {
+            type: mongoose.Types.Decimal128,
+            default: 0.08,
+          },
+        },
+      ],
+
+      // validate: {
+      //   validator: function (this: IUser, el: any) {
+      //     console.log(el);
+      //     console.log(this.role);
+      //   },
+      // },
+    },
+    dob: Date,
+    customerType: {
+      type: String,
+      enum: ["wholesale", "personal"],
+      default: "personal",
+    },
+    address: [
+      {
+        streetAddr: {
+          type: String,
+          required: [true, "There must be a street address"],
+        },
+        city: {
+          type: String,
+          required: [true, "There must be a city"],
+        },
+      },
+    ],
+    discountRates: [
+      {
+        website: {
+          type: String,
+          required: [true, "discount rate must be specified for a website"],
+        },
+        rate: {
+          type: mongoose.Types.Decimal128,
+          default: 0.08,
+        },
+      },
+    ],
   },
 });
 

@@ -10,7 +10,7 @@ export interface IUser {
   passwordConfirm?: string;
   passwordChangedAt?: number;
   active?: boolean;
-  customId: string;
+  customId?: string;
   createdAt: number;
   notes?: string;
   profile: string;
