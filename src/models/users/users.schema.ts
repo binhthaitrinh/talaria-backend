@@ -21,11 +21,6 @@ const userSchema = new Schema<IUserDocument, IUserModel>({
     type: String,
     default: "default.jpg",
   },
-  role: {
-    type: String,
-    enum: ["user", "admin", "moderator", "affiliate"],
-    default: "user",
-  },
   password: {
     type: String,
     required: [true, "Please provide your password"],
@@ -51,6 +46,25 @@ const userSchema = new Schema<IUserDocument, IUserModel>({
     type: Boolean,
     default: true,
     select: false,
+  },
+  customId: {
+    type: String,
+    unique: true,
+  },
+  createdAt: {
+    type: Date,
+    default: Date.now(),
+  },
+  notes: String,
+  profile: {
+    type: Schema.Types.ObjectId,
+    required: true,
+    refPath: "role",
+  },
+  role: {
+    type: String,
+    enum: ["Admin", "Affiliate", "Customer"],
+    default: "Customer",
   },
 });
 

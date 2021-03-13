@@ -1,7 +1,15 @@
-import { Request, Response, NextFunction } from "express";
+export interface socialMedia {
+  website: string;
+  link: string;
+}
 
-export type MiddlewareFn = (
-  req?: Request,
-  res?: Response,
-  next?: NextFunction
-) => any;
+export interface bankAcct {
+  bankName: string;
+  acctNumber: string;
+  bankLocation?: string;
+}
+
+export interface commissionRate {
+  website: string;
+  rate: number;
+}

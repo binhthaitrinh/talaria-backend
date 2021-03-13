@@ -9,9 +9,11 @@ export interface IUser {
   password?: string;
   passwordConfirm?: string;
   passwordChangedAt?: number;
-  passwordResetToken?: string;
-  passwordResetExpires?: number;
   active?: boolean;
+  customId: string;
+  createdAt: number;
+  notes?: string;
+  profile: string;
 }
 
 export interface IUserDocument extends IUser, Document {

@@ -1,5 +1,4 @@
 import { IUserDocument } from "./users.types";
-import { Document } from "mongoose";
 import bcrypt from "bcrypt";
 
 export async function comparePassword(

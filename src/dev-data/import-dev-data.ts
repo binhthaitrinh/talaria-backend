@@ -1,6 +1,7 @@
 import mongoose from "mongoose";
 import dotenv from "dotenv";
 import { Account } from "../models/accounts/accounts.model";
+import { User } from "../models/users/users.model";
 
 dotenv.config({ path: `${__dirname}/../../.env` });
 
@@ -24,6 +25,7 @@ mongoose
 const deleteData = async () => {
   try {
     await Account.deleteMany();
+    await User.deleteMany();
     console.log("DELETE SUCCESSFUL");
     process.exit();
   } catch (err) {

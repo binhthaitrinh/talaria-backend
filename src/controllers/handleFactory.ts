@@ -78,10 +78,14 @@ export const deleteOne = (Model: Model<any>) => {
 
 export const updateOne = (Model: Model<any>) => {
   return catchAsync(async (req: Request, res: Response, next: NextFunction) => {
-    const doc = await Model.findByIdAndUpdate(req.params.id, req.body, {
-      new: true,
-      runValidators: true,
-    });
+    const doc = await Model.findByIdAndUpdate(
+      req.params.id,
+      { ...req.body, updatedAt: Date.now() },
+      {
+        new: true,
+        runValidators: true,
+      }
+    );
 
     if (!doc) {
       return next(
