@@ -1,9 +1,5 @@
 import mongoose, { Schema } from "mongoose";
-import {
-  ITransaction,
-  ITransactionDocument,
-  ITransactionModel,
-} from "./transactions.types";
+import { ITransactionDocument, ITransactionModel } from "./transactions.types";
 
 const transactionSchema = new Schema<ITransactionDocument, ITransactionModel>({
   createdAt: {

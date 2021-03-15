@@ -1,9 +1,5 @@
 import { Document, Model } from "mongoose";
-
-interface MoneyType {
-  value: number;
-  currency: string;
-}
+import { MoneyType } from "../../types";
 
 export interface ITransaction {
   createdAt: number;

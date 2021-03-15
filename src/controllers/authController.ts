@@ -7,8 +7,6 @@ import { catchAsync } from "../utils/catchAsync";
 import { v4 } from "uuid";
 import { FORGOT_PASSWORD_PREFIX } from "../constants";
 import { Email } from "../utils/sendEmail";
-import { createOne } from "./handleFactory";
-import { Affiliate } from "../models/affiliates/affiliates.model";
 
 const signToken = (id: string) => {
   return jwt.sign({ id }, <string>process.env.JWT_SECRET, {
