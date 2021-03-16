@@ -1,8 +1,7 @@
-import mongoose, { Schema, CallbackError } from "mongoose";
+import mongoose, { Schema } from "mongoose";
 import { ITransactionDocument, ITransactionModel } from "./transactions.types";
 import AppError from "../../utils/AppError";
 import { Account } from "../accounts/accounts.model";
-import { MoneyType } from "../../types";
 
 const transactionSchema = new Schema<ITransactionDocument, ITransactionModel>({
   createdAt: {
@@ -56,31 +55,31 @@ const transactionSchema = new Schema<ITransactionDocument, ITransactionModel>({
   },
 });
 
-async function updateAcct(
-  id: string,
-  amount: MoneyType,
-  debit: boolean,
-  next: (err?: CallbackError | undefined) => void
-) {
-  try {
-    const doc = await Account.findOneAndUpdate(
-      { _id: mongoose.Types.ObjectId(id), currency: amount.currency },
-      {
-        $inc: {
-          balance: amount.value * (debit ? 1 : -1),
-        },
-      },
-      { returnOriginal: false }
-    );
-    if (!doc) {
-      return next(new AppError("Cannot find account to update", 404));
-    }
+// async function updateAcct(
+//   id: string,
+//   amount: MoneyType,
+//   debit: boolean,
+//   next: (err?: CallbackError | undefined) => void
+// ) {
+//   try {
+//     const doc = await Account.findOneAndUpdate(
+//       { _id: mongoose.Types.ObjectId(id), currency: amount.currency },
+//       {
+//         $inc: {
+//           balance: amount.value * (debit ? 1 : -1),
+//         },
+//       },
+//       { returnOriginal: false }
+//     );
+//     if (!doc) {
+//       return next(new AppError("Cannot find account to update", 404));
+//     }
 
-    return doc;
-  } catch (err) {
-    return next(new AppError("Something wrong with account update", 500));
-  }
-}
+//     return doc;
+//   } catch (err) {
+//     return next(new AppError("Something wrong with account update", 500));
+//   }
+// }
 
 transactionSchema.pre<ITransactionDocument>("save", async function (next) {
   if (this.fromAcct) {

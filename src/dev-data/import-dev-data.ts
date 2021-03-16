@@ -1,7 +1,8 @@
 import mongoose from "mongoose";
 import dotenv from "dotenv";
 import { Account } from "../models/accounts/accounts.model";
-import { User } from "../models/users/users.model";
+// import { User } from "../models/users/users.model";
+import { Crypto } from "../models/crypto/crypto.model";
 import fs from "fs";
 
 dotenv.config({ path: `${__dirname}/../../.env` });
@@ -29,8 +30,11 @@ mongoose
 
 const deleteData = async () => {
   try {
-    await Account.deleteMany();
-    await User.deleteMany();
+    // await Account.deleteMany();
+    // await User.deleteMany();
+    if (process.argv[3] === "--cryptos") {
+      await Crypto.deleteMany();
+    }
     console.log("DELETE SUCCESSFUL");
     process.exit();
   } catch (err) {
