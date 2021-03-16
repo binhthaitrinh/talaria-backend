@@ -7,13 +7,13 @@ import {
   deleteCrypto,
 } from "../controllers/cryptoController";
 
-const accountRouter = express.Router();
+const cryptoRouter = express.Router();
 
-accountRouter.route("/").get(getCryptos).post(createCrypto);
-accountRouter
+cryptoRouter.route("/").get(getCryptos).post(createCrypto);
+cryptoRouter
   .route("/:id")
   .get(getCrypto)
   .patch(updateCrypto)
   .delete(deleteCrypto);
 
-export default accountRouter;
+export default cryptoRouter;

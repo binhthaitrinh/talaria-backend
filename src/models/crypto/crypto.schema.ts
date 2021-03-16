@@ -1,5 +1,7 @@
-import mongoose, { mongo, Schema } from "mongoose";
+import mongoose, { Schema } from "mongoose";
 import { ICryptoDocument, ICryptoModel } from "./crypto.types";
+import AppError from "../../utils/AppError";
+import { Transaction } from "../transaction/transactions.model";
 
 const cryptoSchema = new Schema<ICryptoDocument, ICryptoModel>({
   createdAt: {
@@ -54,12 +56,55 @@ const cryptoSchema = new Schema<ICryptoDocument, ICryptoModel>({
   fromAccount: {
     type: mongoose.Types.ObjectId,
     ref: "Account",
+    required: [true, "There must be an account associated with fromAccount"],
   },
-
   toAccount: {
     type: mongoose.Types.ObjectId,
     ref: "Account",
+    required: [true, "Buying crypto must be associated with an account"],
   },
+});
+
+cryptoSchema.pre<ICryptoDocument>("save", async function (next) {
+  try {
+    // 1. create a new transaction
+    const transaction = await Transaction.create({
+      fromAcct: this.fromAccount,
+      toAcct: this.toAccount,
+      amountSent: this.moneySpent,
+      amountRcved: {
+        value: this.btcAmount,
+        currency: "btc",
+      },
+    });
+
+    if (!transaction) {
+      return next(new AppError("Problem with transaction creation", 400));
+    }
+    // Set field transaction
+    this.transaction = transaction._id;
+
+    // Convert currency to VND if currency is in USD
+    let vndSpent = parseFloat(this.moneySpent.value.toString());
+    if (this.moneySpent.currency === "usd") {
+      vndSpent = Math.round(vndSpent * 100 * this.usdVndRate * 100) / 10000;
+    }
+
+    // Set remainingBalance to btcAmount
+    this.remainingBalance.amount = this.btcAmount;
+
+    // Calculate btcVnd rating of this crypto buy
+    this.remainingBalance.rating =
+      Math.round(
+        ((vndSpent * 100000000) /
+          (this.btcAmount * 100000000 + this.withdrawFee * 100000000)) *
+          100000000
+      ) / 100000000;
+  } catch (err) {
+    return next(new AppError(err, 500));
+  }
+
+  next();
 });
 
 export default cryptoSchema;
