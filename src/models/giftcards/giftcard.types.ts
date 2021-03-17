@@ -1,9 +1,9 @@
 import { Document, Model, Types } from "mongoose";
 import { MoneyType } from "../../types";
 
-interface PartialBalance {
-  rate: Types.Decimal128;
-  balance: Types.Decimal128;
+export interface PartialBalance {
+  rate?: number;
+  balance?: number;
 }
 
 export interface IGiftcard {
@@ -12,13 +12,13 @@ export interface IGiftcard {
   notes?: string;
   price: MoneyType;
   fee: MoneyType;
-  value: Types.Decimal128;
+  value: number;
   website: string;
-  discountRate?: Types.Decimal128;
-  remainingBalance?: Types.Decimal128;
-  partialBalance?: [PartialBalance];
-  btcUsdRate: Types.Decimal128;
-  usdVndRate: Types.Decimal128;
+  discountRate?: number;
+  remainingBalance?: number;
+  partialBalance?: PartialBalance[];
+  btcUsdRate: number;
+  usdVndRate: number;
   pics?: [string];
   customId?: string;
   transaction?: string;
