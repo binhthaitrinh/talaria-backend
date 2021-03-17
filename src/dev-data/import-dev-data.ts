@@ -4,6 +4,7 @@ import { Account } from "../models/accounts/accounts.model";
 // import { User } from "../models/users/users.model";
 import { Crypto } from "../models/crypto/crypto.model";
 import fs from "fs";
+import { Giftcard } from "../models/giftcards/giftcard.model";
 
 dotenv.config({ path: `${__dirname}/../../.env` });
 
@@ -34,6 +35,9 @@ const deleteData = async () => {
     // await User.deleteMany();
     if (process.argv[3] === "--cryptos") {
       await Crypto.deleteMany();
+    }
+    if (process.argv[3] === "--giftcards") {
+      await Giftcard.deleteMany();
     }
     console.log("DELETE SUCCESSFUL");
     process.exit();
