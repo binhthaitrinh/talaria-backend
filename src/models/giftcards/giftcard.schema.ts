@@ -1,9 +1,9 @@
 import mongoose from "mongoose";
 import AppError from "../../utils/AppError";
-import { Transaction } from "../transaction/transactions.model";
-import { IGiftcard, IGiftcardDocument, IGiftcardModel } from "./giftcard.types";
+import { IGiftcardDocument, IGiftcardModel } from "./giftcard.types";
 import { MUL } from "../../constants";
-import { PartialBalance } from "./giftcard.types";
+import { Crypto } from "../crypto/crypto.model";
+import { Transaction } from "../transaction/transactions.model";
 
 const giftcardSchema = new mongoose.Schema<IGiftcardDocument, IGiftcardModel>({
   createdAt: {
@@ -68,7 +68,7 @@ const giftcardSchema = new mongoose.Schema<IGiftcardDocument, IGiftcardModel>({
   pics: [String],
   customId: {
     type: String,
-    unique: true,
+    // unique: true,
   },
   transaction: {
     type: mongoose.Types.ObjectId,
@@ -116,37 +116,128 @@ giftcardSchema.pre<IGiftcardDocument>("save", async function (next) {
   }
 
   // if bought with BTC, we need to query cryptos
-  next();
+  try {
+    const cryptos = await Crypto.find(
+      { "remainingBalance.amount": { $gt: 0 } },
+      { remainingBalance: 1 },
+      { sort: { createdAt: 1, _id: 1 } }
+    );
+
+    if (cryptos.length <= 0) {
+      return next(new AppError("Please check if there are enough BTC", 400));
+    }
+
+    const totalBtcNeeded =
+      Math.round(this.price.value * MUL + this.fee.value * MUL) / MUL;
+    let remainingBtc = totalBtcNeeded;
+    let remainingGc = this.value;
+    const rates = [];
+    let i = 0;
+    const cryptoLength = cryptos.length;
+    const promises = [];
+
+    let curCryptoBalance = parseFloat(
+      cryptos[0].remainingBalance.amount.toString()
+    );
+
+    // for cryptos that will be consumed as a whole
+    while (i < cryptoLength && remainingBtc > curCryptoBalance) {
+      const curCrypto = cryptos[i];
+      const btcVndRate = parseFloat(
+        curCrypto.remainingBalance.rating.toString()
+      );
+      const gcVndRate =
+        Math.round((btcVndRate * MUL * totalBtcNeeded) / this.value) / MUL;
+      const partialBalance =
+        Math.round(
+          (curCryptoBalance * MUL * MUL * this.value) / (totalBtcNeeded * MUL)
+        ) / MUL;
+      const partialRate = { rate: gcVndRate, balance: partialBalance };
+      rates.push(partialRate);
+      remainingGc = Math.round(remainingGc * MUL - partialBalance * MUL) / MUL;
+      remainingBtc =
+        Math.round(remainingBtc * MUL - curCryptoBalance * MUL) / MUL;
+      promises.push(
+        Crypto.updateOne(
+          { _id: curCrypto._id },
+          { $set: { "remainingBalance.amount": 0 } }
+        )
+      );
+
+      // update for the loop
+      i += 1;
+      curCryptoBalance = parseFloat(
+        cryptos[i].remainingBalance.amount.toString()
+      );
+    }
+
+    if (i >= cryptoLength) {
+      return next(new AppError("Not enought BTC", 400));
+    }
+
+    // for the last crypto deposit
+    const curCrypto = cryptos[i];
+    const btcVndRate = parseFloat(curCrypto.remainingBalance.rating.toString());
+    const gcVndRate =
+      Math.round((btcVndRate * MUL * totalBtcNeeded) / this.value) / MUL;
+    const partialRate = {
+      rate: gcVndRate,
+      balance: remainingGc,
+    };
+
+    rates.push(partialRate);
+
+    const btcLeft =
+      Math.round(curCryptoBalance * MUL - remainingBtc * MUL) / MUL;
+
+    promises.push(
+      Crypto.updateOne(
+        { _id: curCrypto._id },
+        { $set: { "remainingBalance.amount": btcLeft } }
+      )
+    );
+
+    this.partialBalance = rates;
+
+    this.discountRate =
+      1 - ((this.price.value + this.fee.value) * this.btcUsdRate) / this.value;
+
+    await Promise.all(promises);
+
+    next();
+  } catch (err) {
+    return next(err);
+  }
 });
 
 // create transaction
-// giftcardSchema.pre<IGiftcardDocument>("save", async function (next) {
-//   try {
-//     const transaction = await Transaction.create({
-//       fromAcct: this.fromAccount,
-//       toAcct: this.toAccount,
-//       amountSent: {
-//         value:
-//           Math.round(
-//             this.price.value * 100000000 + this.fee.value * 100000000
-//           ) / 100000000,
-//         currency: this.price.currency,
-//       },
-//       amountRcved: {
-//         value: this.value,
-//         currency: "usd",
-//       },
-//     });
-//     if (!transaction) {
-//       return next(
-//         new AppError("Error processing. Please double check input", 400)
-//       );
-//     }
-//     this.transaction = transaction._id;
-//     return next();
-//   } catch (err) {
-//     return next(new AppError(err, 500));
-//   }
-// });
+giftcardSchema.pre<IGiftcardDocument>("save", async function (next) {
+  try {
+    const transaction = await Transaction.create({
+      fromAcct: this.fromAccount,
+      toAcct: this.toAccount,
+      amountSent: {
+        value:
+          Math.round(
+            this.price.value * 100000000 + this.fee.value * 100000000
+          ) / 100000000,
+        currency: this.price.currency,
+      },
+      amountRcved: {
+        value: this.value,
+        currency: "usd",
+      },
+    });
+    if (!transaction) {
+      return next(
+        new AppError("Error processing. Please double check input", 400)
+      );
+    }
+    this.transaction = transaction._id;
+    return next();
+  } catch (err) {
+    return next(new AppError(err, 500));
+  }
+});
 
 export default giftcardSchema;

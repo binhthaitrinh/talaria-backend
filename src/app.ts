@@ -7,6 +7,7 @@ import accountRouter from "./routes/accountRoutes";
 import counterRouter from "./routes/counterRoutes";
 import cryptoRouter from "./routes/cryptoRoutes";
 import giftcardRouter from "./routes/giftcardRoutes";
+import warehouseRouter from "./routes/warehouseRoutes";
 
 const app = express();
 
@@ -22,8 +23,9 @@ app.get("/", async (_req, res, _next) => {
 app.use("/api/v1/users", userRouter);
 app.use("/api/v1/accounts", accountRouter);
 app.use("/api/v1/counters", counterRouter);
-app.use("/api/v1/crypto", cryptoRouter);
+app.use("/api/v1/cryptos", cryptoRouter);
 app.use("/api/v1/giftcards", giftcardRouter);
+app.use("/api/v1/warehouses", warehouseRouter);
 
 app.all("*", (req, _res, next) => {
   next(new AppError(`Can't find ${req.originalUrl} on this server`, 404));

@@ -12,6 +12,14 @@ const accounts = JSON.parse(
   fs.readFileSync(`${__dirname}/accounts.json`, "utf-8")
 );
 
+const cryptos = JSON.parse(
+  fs.readFileSync(`${__dirname}/crypto.json`, "utf-8")
+);
+
+const giftcards = JSON.parse(
+  fs.readFileSync(`${__dirname}/giftcard.json`, "utf-8")
+);
+
 const DB: string = <string>(
   process.env.MONGO_URI?.replace(
     "<PASSWORD>",
@@ -51,6 +59,33 @@ const importData = async () => {
     if (process.argv[3] === "--accounts") {
       await Account.create(accounts);
       console.log("Accounts successfully loaded");
+    }
+    if (process.argv[3] === "--cryptos") {
+      await Crypto.create(cryptos[0]);
+      await Crypto.create(cryptos[1]);
+      await Crypto.create(cryptos[2]);
+      await Crypto.create(cryptos[3]);
+      await Crypto.create(cryptos[4]);
+      await Crypto.create(cryptos[5]);
+      await Crypto.create(cryptos[6]);
+      await Crypto.create(cryptos[7]);
+      await Crypto.create(cryptos[8]);
+      await Crypto.create(cryptos[9]);
+      console.log("Accounts successfully loaded");
+    }
+    if (process.argv[3] === "--giftcards") {
+      await Giftcard.create(giftcards[0]);
+      await Giftcard.create(giftcards[1]);
+      await Giftcard.create(giftcards[2]);
+      await Giftcard.create(giftcards[3]);
+      await Giftcard.create(giftcards[4]);
+      await Giftcard.create(giftcards[5]);
+      await Giftcard.create(giftcards[6]);
+      await Giftcard.create(giftcards[7]);
+      await Giftcard.create(giftcards[8]);
+      await Giftcard.create(giftcards[9]);
+
+      console.log("Giftcards successfully loaded");
     }
     process.exit();
   } catch (err) {

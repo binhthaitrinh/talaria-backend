@@ -43,7 +43,7 @@ const cryptoSchema = new Schema<ICryptoDocument, ICryptoModel>({
   notes: String,
   customId: {
     type: String,
-    unique: true,
+    // unique: true,
   },
   transaction: {
     type: mongoose.Types.ObjectId,
