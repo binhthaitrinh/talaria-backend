@@ -9,6 +9,7 @@ import cryptoRouter from "./routes/cryptoRoutes";
 import giftcardRouter from "./routes/giftcardRoutes";
 import warehouseRouter from "./routes/warehouseRoutes";
 import itemRouter from "./routes/itemRoutes";
+import billRouter from "./routes/billRoutes";
 
 const app = express();
 
@@ -28,6 +29,7 @@ app.use("/api/v1/cryptos", cryptoRouter);
 app.use("/api/v1/giftcards", giftcardRouter);
 app.use("/api/v1/warehouses", warehouseRouter);
 app.use("/api/v1/items", itemRouter);
+app.use("/api/v1/bills", billRouter);
 
 app.all("*", (req, _res, next) => {
   next(new AppError(`Can't find ${req.originalUrl} on this server`, 404));
