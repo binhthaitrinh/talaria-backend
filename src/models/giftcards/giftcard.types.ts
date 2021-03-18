@@ -1,4 +1,4 @@
-import { Document, Model, Types } from "mongoose";
+import { Document, Model } from "mongoose";
 import { MoneyType } from "../../types";
 
 export interface PartialBalance {
