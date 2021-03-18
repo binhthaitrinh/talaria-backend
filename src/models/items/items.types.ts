@@ -35,4 +35,10 @@ export interface IItem {
 
 export interface IItemDocument extends IItem, Document {}
 
-export interface IItemModel extends Model<IItemDocument> {}
+export interface IItemModel extends Model<IItemDocument> {
+  buy: (
+    this: IItemModel,
+    _id: string,
+    accountId: string
+  ) => Promise<IItemDocument | null>;
+}

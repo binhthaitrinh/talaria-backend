@@ -1,4 +1,4 @@
-import mongoose from "mongoose";
+import mongoose, { Types } from "mongoose";
 import AppError from "../../utils/AppError";
 import { IGiftcardDocument, IGiftcardModel } from "./giftcard.types";
 import { MUL } from "../../constants";
@@ -21,11 +21,14 @@ const giftcardSchema = new mongoose.Schema<IGiftcardDocument, IGiftcardModel>({
       },
     },
     required: [true, "There must be a price"],
+    get: (v: Types.Decimal128) => parseFloat(v.toString()),
   },
+
   fee: {
     value: {
       type: mongoose.Types.Decimal128,
       default: 0.0,
+      get: (v: Types.Decimal128) => parseFloat(v.toString()),
     },
     currency: {
       type: String,
@@ -52,11 +55,20 @@ const giftcardSchema = new mongoose.Schema<IGiftcardDocument, IGiftcardModel>({
   discountRate: mongoose.Types.Decimal128,
   partialBalance: [
     {
-      rate: mongoose.Types.Decimal128,
-      balance: mongoose.Types.Decimal128,
+      rate: {
+        type: mongoose.Types.Decimal128,
+        get: (v: Types.Decimal128) => (v ? parseFloat(v.toString()) : null),
+      },
+      balance: {
+        type: mongoose.Types.Decimal128,
+        get: (v: Types.Decimal128) => (v ? parseFloat(v.toString()) : null),
+      },
     },
   ],
-  remainingBalance: mongoose.Types.Decimal128,
+  remainingBalance: {
+    type: mongoose.Types.Decimal128,
+    get: (v: Types.Decimal128) => (v ? parseFloat(v.toString()) : null),
+  },
   btcUsdRate: {
     type: mongoose.Types.Decimal128,
     default: 50000,

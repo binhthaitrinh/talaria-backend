@@ -1,5 +1,6 @@
 import { Schema, Types } from "mongoose";
 import { IItemModel, IItemDocument } from "./items.types";
+import { buy } from "./items.statics";
 
 const itemSchema = new Schema<IItemDocument, IItemModel>({
   createdAt: {
@@ -18,31 +19,41 @@ const itemSchema = new Schema<IItemDocument, IItemModel>({
   pricePerItem: {
     type: Types.Decimal128,
     required: [true, "An item must have a price"],
+    get: (v: Types.Decimal128) => parseFloat(v.toString()),
   },
-  actPricePerItem: Types.Decimal128,
+  actPricePerItem: {
+    type: Types.Decimal128,
+    get: (v: Types.Decimal128) => (v ? parseFloat(v.toString()) : null),
+  },
   quantity: {
     type: Number,
-    required: [true, "There must be quantity associated"],
+    default: 1,
   },
   tax: {
     type: Types.Decimal128,
     default: 0.0,
+
+    get: (v: Types.Decimal128) => parseFloat(v.toString()),
   },
   usShippingFee: {
     type: Types.Decimal128,
     default: 0.0,
+    get: (v: Types.Decimal128) => parseFloat(v.toString()),
   },
   extraShippingCost: {
     type: Types.Decimal128,
     default: 0.0,
+    get: (v: Types.Decimal128) => parseFloat(v.toString()),
   },
   estWgtPerItem: {
     type: Types.Decimal128,
     required: [true, "An item must have its weight"],
+    get: (v: Types.Decimal128) => parseFloat(v.toString()),
   },
   actWgtPerItem: {
     type: Types.Decimal128,
     default: 0.0,
+    get: (v: Types.Decimal128) => parseFloat(v.toString()),
   },
   actualCost: Types.Decimal128,
   trackingLink: String,
@@ -86,7 +97,7 @@ const itemSchema = new Schema<IItemDocument, IItemModel>({
   commissionRate: Types.Decimal128,
   itemType: {
     type: String,
-    enum: ["cosmetics", "toys", "others"],
+    enum: ["cosmetics", "toys", "others", "electronics", "accessories"],
     default: "others",
   },
   customId: {
@@ -101,6 +112,17 @@ const itemSchema = new Schema<IItemDocument, IItemModel>({
     type: Types.ObjectId,
     ref: "Warehouse",
   },
+  transaction: {
+    type: Types.ObjectId,
+    ref: "Transaction",
+  },
 });
+
+// itemSchema.pre<IItemDocument>("save", async function (next) {
+//   this.actPricePerItem = this.pricePerItem;
+//   next();
+// });
+
+itemSchema.statics.buy = buy;
 
 export default itemSchema;
