@@ -1,5 +1,4 @@
 import { Schema } from "mongoose";
-import { kStringMaxLength } from "node:buffer";
 import { IWarehouseDocument, IWarehouseModel } from "./warehouses.types";
 
 const warehouseSchema = new Schema<IWarehouseDocument, IWarehouseModel>({

@@ -71,6 +71,7 @@ export const signin = catchAsync(
 
     // by this point, everything is OK
     createSendToken(user!, 200, res);
+    res.locals.user = user;
   }
 );
 
@@ -164,7 +165,7 @@ export const protect = catchAsync(
   ) => {
     console.log("CALLED");
     var token;
-    console.log(req.cookies);
+    console.log(req.headers.authorization);
     if (req.headers.authorization?.startsWith("Bearer")) {
       token = req.headers.authorization.split(" ")[1];
     } else if (req.cookies?.jwt) {

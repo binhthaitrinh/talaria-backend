@@ -10,8 +10,23 @@ import giftcardRouter from "./routes/giftcardRoutes";
 import warehouseRouter from "./routes/warehouseRoutes";
 import itemRouter from "./routes/itemRoutes";
 import billRouter from "./routes/billRoutes";
+import cors from "cors";
 
 const app = express();
+
+const allowList = ["http://localhost:3000"];
+
+const corsOption = function (req, callback) {
+  let corsOption;
+  if (allowList.indexOf(req.header("Origin")) !== -1) {
+    corsOption = { origin: true, credentials: true };
+  } else {
+    corsOption = { origin: false, credentials: true };
+  }
+  callback(null, corsOption);
+};
+
+app.use(cors(corsOption));
 
 app.use(express.json());
 

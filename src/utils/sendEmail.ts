@@ -2,7 +2,6 @@ import nodemailer from "nodemailer";
 import Mail from "nodemailer/lib/mailer";
 import { __prod__ } from "../constants";
 import { IUser } from "../models/users/users.types";
-import pug from "pug";
 
 export class Email {
   to: string;

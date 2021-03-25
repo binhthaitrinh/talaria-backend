@@ -49,7 +49,7 @@ const userSchema = new Schema<IUserDocument, IUserModel>({
   },
   customId: {
     type: String,
-    unique: true,
+    // unique: true,
   },
   createdAt: {
     type: Date,
