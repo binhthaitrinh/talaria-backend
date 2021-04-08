@@ -1,5 +1,6 @@
 import mongoose from "mongoose";
 import dotenv from "dotenv";
+import { Item } from "../models/items/items.model";
 import { Account } from "../models/accounts/accounts.model";
 // import { User } from "../models/users/users.model";
 import { Crypto } from "../models/crypto/crypto.model";
@@ -19,6 +20,8 @@ const cryptos = JSON.parse(
 const giftcards = JSON.parse(
   fs.readFileSync(`${__dirname}/giftcard.json`, "utf-8")
 );
+
+const items = JSON.parse(fs.readFileSync(`${__dirname}/items.json`, "utf-8"));
 
 const DB: string = <string>(
   process.env.MONGO_URI?.replace(
@@ -59,6 +62,10 @@ const importData = async () => {
     if (process.argv[3] === "--accounts") {
       await Account.create(accounts);
       console.log("Accounts successfully loaded");
+    }
+    if (process.argv[3] === "--items") {
+      await Item.create(items);
+      console.log("items successfully loaded");
     }
     if (process.argv[3] === "--cryptos") {
       await Crypto.create(cryptos[0]);

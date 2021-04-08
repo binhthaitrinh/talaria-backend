@@ -1,7 +1,7 @@
 import { Schema, Types } from "mongoose";
 import { IItemModel, IItemDocument } from "./items.types";
 import { buy } from "./items.statics";
-import { decToNum } from "../../utils";
+import { decToNum, decToStr } from "../../utils";
 
 const itemSchema = new Schema<IItemDocument, IItemModel>(
   {
@@ -122,13 +122,24 @@ const itemSchema = new Schema<IItemDocument, IItemModel>(
   {
     toJSON: {
       transform: (_doc, ret) => {
-        ret.usShippingFee = decToNum(ret.usShippingFee);
-        ret.tax = decToNum(ret.tax);
-        ret.extraShippingCost = decToNum(ret.extraShippingCost);
-        ret.actWgtPerItem = decToNum(ret.actWgtPerItem);
-        ret.pricePerItem = decToNum(ret.pricePerItem);
-        ret.actualCost = decToNum(ret.actualCost);
-        ret.estWgtPerItem = decToNum(ret.estWgtPerItem);
+        ret.usShippingFee = decToStr(ret.usShippingFee, "usd");
+        ret.tax = decToStr(ret.tax, "percent");
+        ret.extraShippingCost = decToStr(ret.extraShippingCost, "usd");
+        ret.actWgtPerItem = decToStr(ret.actWgtPerItem, "kg");
+        ret.pricePerItem = decToStr(ret.pricePerItem, "usd");
+        ret.actualCost = decToStr(ret.actualCost, "vnd");
+        ret.estWgtPerItem = decToStr(ret.estWgtPerItem, "kg");
+        ret.commissionRate = decToStr(ret.commissionRate, "percent");
+        ret.actPricePerItem = decToStr(ret.actPricePerIte, "usd");
+        ret.createdAt = decToStr(ret.createdAt, "date");
+        ret.updatedAt = decToStr(ret.updatedAt, "date");
+        ret.orderDate = decToStr(ret.orderDate, "date");
+        ret.arrvlAtWarehouseDate = decToStr(ret.arrvlAtWarehouseDate, "date");
+        ret.shippingToVnDate = decToStr(ret.shippingToVnDate, "date");
+        ret.arrvlAtVnDate = decToStr(ret.arrvlAtVnDate, "date");
+        ret.customerRcvDate = decToStr(ret.customerRcvDate, "date");
+        ret.returnDate = decToStr(ret.returnDate, "date");
+        ret.returnArrvlDate = decToStr(ret.returnArrvlDate, "date");
         return ret;
       },
     },

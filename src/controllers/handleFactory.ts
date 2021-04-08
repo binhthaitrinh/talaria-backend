@@ -3,6 +3,7 @@ import { Request, Response, NextFunction } from "express";
 import { Model, QueryOptions } from "mongoose";
 import AppError from "../utils/AppError";
 import APIFeatures from "../utils/APIFeatures";
+import util from "util";
 import { getNextSequence } from "../utils/getNextSequence";
 
 export const createOne = (Model: Model<any>) => {
@@ -54,10 +55,14 @@ export const getAll = (Model: Model<any>) => {
       .sort()
       .limitFields()
       .paginate();
+
     const docs = await features.query;
+    const count = await Model.find().countDocuments();
+
     res.status(200).json({
       status: "success",
       data: {
+        totalCount: count,
         data: docs,
       },
     });

@@ -5,10 +5,6 @@ import { Transaction } from "../transaction/transactions.model";
 import { Giftcard } from "../giftcards/giftcard.model";
 import { MUL } from "../../constants";
 
-function toNumber(dec: Types.Decimal128) {
-  return parseFloat(dec.toString());
-}
-
 export async function buy(
   this: IItemModel,
   id: string,
@@ -25,7 +21,6 @@ export async function buy(
     }
 
     let {
-      _id,
       usShippingFee,
       quantity,
       pricePerItem,
@@ -81,7 +76,7 @@ export async function buy(
     let i = 0;
     let currentGcBal = giftcards[0].remainingBalance;
     const promises = [];
-    const partialBalance = [];
+    // const partialBalance = [];
 
     while (i < giftcards.length && remainingNeeded > currentGcBal!) {
       let j = 0;
