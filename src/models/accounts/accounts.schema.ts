@@ -1,4 +1,5 @@
 import mongoose, { Schema } from "mongoose";
+import { decToStr } from "../../utils";
 import { IAcctDocument, IAcctModel } from "./accounts.types";
 
 const accountSchema = new Schema<IAcctDocument, IAcctModel>(
@@ -49,7 +50,7 @@ const accountSchema = new Schema<IAcctDocument, IAcctModel>(
   {
     toJSON: {
       transform: (_doc, ret) => {
-        ret.balance = parseFloat(ret.balance.toString());
+        ret.balance = decToStr(ret.balance, ret.currency);
         return ret;
       },
     },

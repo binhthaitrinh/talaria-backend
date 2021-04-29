@@ -160,7 +160,7 @@ export const resetPassword = catchAsync(
 export const protect = catchAsync(
   async (
     req: Request & { user?: IUserDocument },
-    res: Response,
+    _res: Response,
     next: NextFunction
   ) => {
     console.log("CALLED");

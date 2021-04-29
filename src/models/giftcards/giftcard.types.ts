@@ -1,5 +1,5 @@
-import { Document, Model } from "mongoose";
-import { MoneyType } from "../../types";
+import { Document, Model } from 'mongoose';
+import { MoneyType } from '../../types';
 
 export interface PartialBalance {
   rate?: number;
@@ -24,6 +24,7 @@ export interface IGiftcard {
   transaction?: string;
   fromAccount: string;
   toAccount: string;
+  bill: string;
 }
 
 export interface IGiftcardDocument extends IGiftcard, Document {}

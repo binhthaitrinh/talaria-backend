@@ -30,6 +30,7 @@ export async function buy(
     } = item;
 
     pricePerItem = actPricePerItem ? actPricePerItem : pricePerItem;
+    console.log(status);
 
     if (status !== "not-yet-ordered") {
       throw new AppError("Item already ordered", 400);
@@ -193,6 +194,7 @@ export async function buy(
     );
 
     await Promise.all(promises);
+    console.log(actualCost);
 
     const updatedItem = await this.findOneAndUpdate(
       {

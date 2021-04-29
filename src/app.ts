@@ -16,7 +16,7 @@ const app = express();
 
 const allowList = ["http://localhost:3000"];
 
-const corsOption = function (req, callback) {
+const corsOption = function (req: any, callback: any) {
   let corsOption;
   if (allowList.indexOf(req.header("Origin")) !== -1) {
     corsOption = { origin: true, credentials: true };

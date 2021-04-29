@@ -1,5 +1,5 @@
-import { Document, Model } from "mongoose";
-import { MoneyType } from "../../types";
+import { Document, Model } from 'mongoose';
+import { MoneyType } from '../../types';
 
 export interface IBill {
   createdAt: number;
@@ -20,6 +20,8 @@ export interface IBill {
   affiliate: string;
 }
 
-export interface IBillDocument extends IBill, Document {}
+export interface IBillDocument extends IBill, Document {
+  calcBill: (this: IBillDocument) => Promise<IBillDocument | null>;
+}
 
 export interface IBillModel extends Model<IBillDocument> {}

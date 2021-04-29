@@ -1,7 +1,7 @@
-import { Schema, Types } from "mongoose";
-import { IItemModel, IItemDocument } from "./items.types";
-import { buy } from "./items.statics";
-import { decToNum, decToStr } from "../../utils";
+import { Schema, Types } from 'mongoose';
+import { IItemModel, IItemDocument } from './items.types';
+import { buy } from './items.statics';
+import { decToStr } from '../../utils';
 
 const itemSchema = new Schema<IItemDocument, IItemModel>(
   {
@@ -12,15 +12,15 @@ const itemSchema = new Schema<IItemDocument, IItemModel>(
     updatedAt: Date,
     name: {
       type: String,
-      required: [true, "An item must have a name"],
+      required: [true, 'An item must have a name'],
     },
     link: {
       type: String,
-      required: [true, "An item must have a link"],
+      required: [true, 'An item must have a link'],
     },
     pricePerItem: {
       type: Types.Decimal128,
-      required: [true, "An item must have a price"],
+      required: [true, 'An item must have a price'],
       get: (v: Types.Decimal128) => parseFloat(v.toString()),
     },
     actPricePerItem: {
@@ -49,7 +49,7 @@ const itemSchema = new Schema<IItemDocument, IItemModel>(
     },
     estWgtPerItem: {
       type: Types.Decimal128,
-      required: [true, "An item must have its weight"],
+      required: [true, 'An item must have its weight'],
       get: (v: Types.Decimal128) => parseFloat(v.toString()),
     },
     actWgtPerItem: {
@@ -71,36 +71,36 @@ const itemSchema = new Schema<IItemDocument, IItemModel>(
     status: {
       type: String,
       enum: [
-        "not-yet-ordered",
-        "ordered",
-        "on-the-way-to-warehouse",
-        "on-the-way-to-viet-nam",
-        "done",
-        "returning",
-        "retunred",
-        "lost",
-        "in-inventory",
+        'not-yet-ordered',
+        'ordered',
+        'on-the-way-to-warehouse',
+        'on-the-way-to-viet-nam',
+        'done',
+        'returning',
+        'retunred',
+        'lost',
+        'in-inventory',
       ],
-      default: "not-yet-ordered",
+      default: 'not-yet-ordered',
     },
     website: {
       type: String,
       enum: [
-        "amazon",
-        "sephora",
-        "bestbuy",
-        "walmart",
-        "target",
-        "costco",
-        "others",
+        'amazon',
+        'sephora',
+        'bestbuy',
+        'walmart',
+        'target',
+        'costco',
+        'others',
       ],
-      default: "amazon",
+      default: 'amazon',
     },
     commissionRate: Types.Decimal128,
     itemType: {
       type: String,
-      enum: ["cosmetics", "toys", "others", "electronics", "accessories"],
-      default: "others",
+      enum: ['cosmetics', 'toys', 'others', 'electronics', 'accessories'],
+      default: 'others',
     },
     customId: {
       type: String,
@@ -108,38 +108,38 @@ const itemSchema = new Schema<IItemDocument, IItemModel>(
     },
     orderAccount: {
       type: Types.ObjectId,
-      ref: "Account",
+      ref: 'Account',
     },
     warehouse: {
       type: Types.ObjectId,
-      ref: "Warehouse",
+      ref: 'Warehouse',
     },
     transaction: {
       type: Types.ObjectId,
-      ref: "Transaction",
+      ref: 'Transaction',
     },
   },
   {
     toJSON: {
       transform: (_doc, ret) => {
-        ret.usShippingFee = decToStr(ret.usShippingFee, "usd");
-        ret.tax = decToStr(ret.tax, "percent");
-        ret.extraShippingCost = decToStr(ret.extraShippingCost, "usd");
-        ret.actWgtPerItem = decToStr(ret.actWgtPerItem, "kg");
-        ret.pricePerItem = decToStr(ret.pricePerItem, "usd");
-        ret.actualCost = decToStr(ret.actualCost, "vnd");
-        ret.estWgtPerItem = decToStr(ret.estWgtPerItem, "kg");
-        ret.commissionRate = decToStr(ret.commissionRate, "percent");
-        ret.actPricePerItem = decToStr(ret.actPricePerIte, "usd");
-        ret.createdAt = decToStr(ret.createdAt, "date");
-        ret.updatedAt = decToStr(ret.updatedAt, "date");
-        ret.orderDate = decToStr(ret.orderDate, "date");
-        ret.arrvlAtWarehouseDate = decToStr(ret.arrvlAtWarehouseDate, "date");
-        ret.shippingToVnDate = decToStr(ret.shippingToVnDate, "date");
-        ret.arrvlAtVnDate = decToStr(ret.arrvlAtVnDate, "date");
-        ret.customerRcvDate = decToStr(ret.customerRcvDate, "date");
-        ret.returnDate = decToStr(ret.returnDate, "date");
-        ret.returnArrvlDate = decToStr(ret.returnArrvlDate, "date");
+        ret.usShippingFee = decToStr(ret.usShippingFee, 'usd');
+        ret.tax = decToStr(ret.tax, 'percent');
+        ret.extraShippingCost = decToStr(ret.extraShippingCost, 'usd');
+        ret.actWgtPerItem = decToStr(ret.actWgtPerItem, 'kg');
+        ret.pricePerItem = decToStr(ret.pricePerItem, 'usd');
+        ret.actualCost = decToStr(ret.actualCost, 'vnd');
+        ret.estWgtPerItem = decToStr(ret.estWgtPerItem, 'kg');
+        ret.commissionRate = decToStr(ret.commissionRate, 'percent');
+        ret.actPricePerItem = decToStr(ret.actPricePerIte, 'usd');
+        ret.createdAt = decToStr(ret.createdAt, 'date');
+        ret.updatedAt = decToStr(ret.updatedAt, 'date');
+        ret.orderDate = decToStr(ret.orderDate, 'date');
+        ret.arrvlAtWarehouseDate = decToStr(ret.arrvlAtWarehouseDate, 'date');
+        ret.shippingToVnDate = decToStr(ret.shippingToVnDate, 'date');
+        ret.arrvlAtVnDate = decToStr(ret.arrvlAtVnDate, 'date');
+        ret.customerRcvDate = decToStr(ret.customerRcvDate, 'date');
+        ret.returnDate = decToStr(ret.returnDate, 'date');
+        ret.returnArrvlDate = decToStr(ret.returnArrvlDate, 'date');
         return ret;
       },
     },

@@ -1,119 +1,141 @@
-import mongoose, { Types } from "mongoose";
-import AppError from "../../utils/AppError";
-import { IGiftcardDocument, IGiftcardModel } from "./giftcard.types";
-import { MUL } from "../../constants";
-import { Crypto } from "../crypto/crypto.model";
-import { Transaction } from "../transaction/transactions.model";
+import mongoose, { Types } from 'mongoose';
+import AppError from '../../utils/AppError';
+import { IGiftcardDocument, IGiftcardModel } from './giftcard.types';
+import { MUL } from '../../constants';
+import { Crypto } from '../crypto/crypto.model';
+import { Transaction } from '../transaction/transactions.model';
+import { decToStr } from '../../utils';
 
-const giftcardSchema = new mongoose.Schema<IGiftcardDocument, IGiftcardModel>({
-  createdAt: {
-    type: Date,
-    default: Date.now(),
-  },
-  updatedAt: Date,
-  notes: String,
-  price: {
-    type: {
-      value: mongoose.Types.Decimal128,
-      currency: {
-        type: String,
-        enum: ["vnd", "usd", "btc"],
-      },
+const giftcardSchema = new mongoose.Schema<IGiftcardDocument, IGiftcardModel>(
+  {
+    createdAt: {
+      type: Date,
+      default: Date.now(),
     },
-    required: [true, "There must be a price"],
-    get: (v: Types.Decimal128) => parseFloat(v.toString()),
-  },
-
-  fee: {
-    value: {
-      type: mongoose.Types.Decimal128,
-      default: 0.0,
+    updatedAt: Date,
+    notes: String,
+    price: {
+      type: {
+        value: mongoose.Types.Decimal128,
+        currency: {
+          type: String,
+          enum: ['vnd', 'usd', 'btc'],
+        },
+      },
+      required: [true, 'There must be a price'],
       get: (v: Types.Decimal128) => parseFloat(v.toString()),
     },
-    currency: {
+
+    fee: {
+      value: {
+        type: mongoose.Types.Decimal128,
+        default: 0.0,
+        get: (v: Types.Decimal128) => parseFloat(v.toString()),
+      },
+      currency: {
+        type: String,
+        enum: ['vnd', 'usd', 'btc'],
+        default: 'btc',
+      },
+    },
+    value: {
+      type: mongoose.Types.Decimal128,
+      required: [true, 'there must be a value associated with a giftcard'],
+    },
+    website: {
       type: String,
-      enum: ["vnd", "usd", "btc"],
+      enum: [
+        'amazon',
+        'sephora',
+        'ebay',
+        'walmart',
+        'bestbuy',
+        'costco',
+        'others',
+      ],
+      required: [true, 'there must be a website associated'],
+    },
+    discountRate: mongoose.Types.Decimal128,
+    partialBalance: [
+      {
+        rate: {
+          type: mongoose.Types.Decimal128,
+          get: (v: Types.Decimal128) => (v ? parseFloat(v.toString()) : null),
+        },
+        balance: {
+          type: mongoose.Types.Decimal128,
+          get: (v: Types.Decimal128) => (v ? parseFloat(v.toString()) : null),
+        },
+      },
+    ],
+    remainingBalance: {
+      type: mongoose.Types.Decimal128,
+      get: (v: Types.Decimal128) => (v ? parseFloat(v.toString()) : null),
+    },
+    btcUsdRate: {
+      type: mongoose.Types.Decimal128,
+      default: 50000,
+    },
+    usdVndRate: {
+      type: mongoose.Types.Decimal128,
+      default: 24000,
+    },
+    pics: [String],
+    customId: {
+      type: String,
+      // unique: true,
+    },
+    transaction: {
+      type: mongoose.Types.ObjectId,
+      ref: 'Transaction',
+    },
+    fromAccount: {
+      type: mongoose.Types.ObjectId,
+      ref: 'Account',
+      required: [
+        true,
+        'There must be an account associated with this giftcard purchase',
+      ],
+    },
+    toAccount: {
+      type: mongoose.Types.ObjectId,
+      ref: 'Account',
+      required: [
+        true,
+        'There must be an account associated with this giftcard purchase',
+      ],
     },
   },
-  value: {
-    type: mongoose.Types.Decimal128,
-    required: [true, "there must be a value associated with a giftcard"],
-  },
-  website: {
-    type: String,
-    enum: [
-      "amazon",
-      "sephora",
-      "ebay",
-      "walmart",
-      "bestbuy",
-      "costco",
-      "others",
-    ],
-    required: [true, "there must be a website associated"],
-  },
-  discountRate: mongoose.Types.Decimal128,
-  partialBalance: [
-    {
-      rate: {
-        type: mongoose.Types.Decimal128,
-        get: (v: Types.Decimal128) => (v ? parseFloat(v.toString()) : null),
-      },
-      balance: {
-        type: mongoose.Types.Decimal128,
-        get: (v: Types.Decimal128) => (v ? parseFloat(v.toString()) : null),
+  {
+    toJSON: {
+      transform: (_doc, ret) => {
+        ret.createdAt = decToStr(ret.createdAt, 'date');
+        ret.updatedAt = decToStr(ret.updatedAt, 'date');
+        ret.price = decToStr(ret.price.value, ret.price.currency);
+        ret.fee = decToStr(ret.fee.value, ret.fee.currency);
+        ret.value = decToStr(ret.value, 'usd');
+        ret.discountRate = ret.discountRate
+          ? decToStr(ret.discountRate, 'percent')
+          : undefined;
+        ret.remainingBalance = decToStr(ret.remainingBalance, 'usd');
+        ret.btcUsdRate = decToStr(ret.btcUsdRate, 'usd');
+        ret.usdVndRate = decToStr(ret.usdVndRate, 'vnd');
+        return ret;
       },
     },
-  ],
-  remainingBalance: {
-    type: mongoose.Types.Decimal128,
-    get: (v: Types.Decimal128) => (v ? parseFloat(v.toString()) : null),
-  },
-  btcUsdRate: {
-    type: mongoose.Types.Decimal128,
-    default: 50000,
-  },
-  usdVndRate: {
-    type: mongoose.Types.Decimal128,
-    default: 24000,
-  },
-  pics: [String],
-  customId: {
-    type: String,
-    // unique: true,
-  },
-  transaction: {
-    type: mongoose.Types.ObjectId,
-    ref: "Transaction",
-  },
-  fromAccount: {
-    type: mongoose.Types.ObjectId,
-    ref: "Account",
-    required: [
-      true,
-      "There must be an account associated with this giftcard purchase",
-    ],
-  },
-  toAccount: {
-    type: mongoose.Types.ObjectId,
-    ref: "Account",
-    required: [
-      true,
-      "There must be an account associated with this giftcard purchase",
-    ],
-  },
-});
+  }
+);
 
 // save value to remainingBalanace
-giftcardSchema.pre<IGiftcardDocument>("save", async function (next) {
+giftcardSchema.pre<IGiftcardDocument>('save', async function (next) {
   this.remainingBalance = this.value;
   next();
 });
 
-giftcardSchema.pre<IGiftcardDocument>("save", async function (next) {
+giftcardSchema.pre<IGiftcardDocument>('save', async function (next) {
   // if bought with vnd || usd, just calculate the partialBalance rates,
   // no cryptos querying needed
-  if (this.price.currency === "vnd") {
+  if (this.price.currency === 'vnd') {
     const partialBalance = [];
     const rate =
       Math.round((this.price.value * MUL + this.fee.value * MUL) / this.value) /
@@ -123,20 +145,20 @@ giftcardSchema.pre<IGiftcardDocument>("save", async function (next) {
     this.discountRate = 1 - Math.round(rate * MUL) / (this.usdVndRate * MUL);
     return next();
   }
-  if (this.price.currency === "usd") {
-    return next(new AppError("cannot buy with USD yet", 400));
+  if (this.price.currency === 'usd') {
+    return next(new AppError('cannot buy with USD yet', 400));
   }
 
   // if bought with BTC, we need to query cryptos
   try {
     const cryptos = await Crypto.find(
-      { "remainingBalance.amount": { $gt: 0 } },
+      { 'remainingBalance.amount': { $gt: 0 } },
       { remainingBalance: 1 },
       { sort: { createdAt: 1, _id: 1 } }
     );
 
     if (cryptos.length <= 0) {
-      return next(new AppError("Please check if there are enough BTC", 400));
+      return next(new AppError('Please check if there are enough BTC', 400));
     }
 
     const totalBtcNeeded =
@@ -172,7 +194,7 @@ giftcardSchema.pre<IGiftcardDocument>("save", async function (next) {
       promises.push(
         Crypto.updateOne(
           { _id: curCrypto._id },
-          { $set: { "remainingBalance.amount": 0 } }
+          { $set: { 'remainingBalance.amount': 0 } }
         )
       );
 
@@ -184,7 +206,7 @@ giftcardSchema.pre<IGiftcardDocument>("save", async function (next) {
     }
 
     if (i >= cryptoLength) {
-      return next(new AppError("Not enought BTC", 400));
+      return next(new AppError('Not enought BTC', 400));
     }
 
     // for the last crypto deposit
@@ -205,7 +227,7 @@ giftcardSchema.pre<IGiftcardDocument>("save", async function (next) {
     promises.push(
       Crypto.updateOne(
         { _id: curCrypto._id },
-        { $set: { "remainingBalance.amount": btcLeft } }
+        { $set: { 'remainingBalance.amount': btcLeft } }
       )
     );
 
@@ -223,7 +245,7 @@ giftcardSchema.pre<IGiftcardDocument>("save", async function (next) {
 });
 
 // create transaction
-giftcardSchema.pre<IGiftcardDocument>("save", async function (next) {
+giftcardSchema.pre<IGiftcardDocument>('save', async function (next) {
   try {
     const transaction = await Transaction.create({
       fromAcct: this.fromAccount,
@@ -237,12 +259,12 @@ giftcardSchema.pre<IGiftcardDocument>("save", async function (next) {
       },
       amountRcved: {
         value: this.value,
-        currency: "usd",
+        currency: 'usd',
       },
     });
     if (!transaction) {
       return next(
-        new AppError("Error processing. Please double check input", 400)
+        new AppError('Error processing. Please double check input', 400)
       );
     }
     this.transaction = transaction._id;

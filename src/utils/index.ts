@@ -5,9 +5,9 @@ export const decToNum = (dec: Types.Decimal128) =>
 export const decToStr = (dec: Types.Decimal128 | number, unit: string) => {
   if (dec) {
     if (unit === "date") {
-      return new Intl.DateTimeFormat("vi-VN", { dateStyle: "medium" }).format(
-        new Date(dec)
-      );
+      return new Intl.DateTimeFormat("vi-VN", {
+        dateStyle: "medium",
+      } as any).format(new Date(dec.toString()));
     } else if (unit === "usd" || unit === "vnd") {
       return new Intl.NumberFormat("us-US", {
         style: "currency",
@@ -20,11 +20,12 @@ export const decToStr = (dec: Types.Decimal128 | number, unit: string) => {
         style: "percent",
       });
     } else if (unit === "kg" || unit === "lbs") {
-      return parseFloat(dec.toString()).toLocaleString(undefined, {
+      return `${parseFloat(dec.toString()).toLocaleString(undefined, {
         minimumFractionDigits: 2,
         maximumFractionDigits: 2,
-      });
+      })} ${unit}`;
     }
   }
-  return "-";
+
+  return undefined;
 };
