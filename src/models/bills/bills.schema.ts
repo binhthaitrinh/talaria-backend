@@ -1,9 +1,10 @@
 import { Types, Schema } from 'mongoose';
 import { IBillDocument, IBillModel } from './bills.types';
-import { SHIPPING_RATE_VND, USD_VND_RATE } from '../../constants';
+import { MUL, SHIPPING_RATE_VND, USD_VND_RATE } from '../../constants';
 import { decToStr } from '../../utils';
 import { calcBill } from './bills.methods';
 import { Item } from '../items/items.model';
+import { User } from '../users/users.model';
 
 const billSchema = new Schema<IBillDocument, IBillModel>(
   {
@@ -44,6 +45,14 @@ const billSchema = new Schema<IBillDocument, IBillModel>(
       default: 0.0,
     },
     totalBillUsd: {
+      type: Types.Decimal128,
+      default: 0.0,
+    },
+    afterDiscount: {
+      type: Types.Decimal128,
+      default: 0.0,
+    },
+    totalEstimatedWeight: {
       type: Types.Decimal128,
       default: 0.0,
     },
@@ -104,20 +113,111 @@ const billSchema = new Schema<IBillDocument, IBillModel>(
 billSchema.pre<IBillDocument>(/^find/, async function (next) {
   this.populate({ path: 'customer', select: 'firstName lastName _id' });
   this.populate({ path: 'affiliate', select: 'firstName lastName _id' });
-  this.populate({ path: 'items', select: 'name quantity pricePerItem' });
+  this.populate({
+    path: 'items',
+    select: 'name quantity pricePerItem',
+  });
   next();
 });
 
-billSchema.pre<IBillDocument>('save', async function (next) {
+billSchema.pre('save', async function (next) {
+  console.log('chaging');
   const items = await Item.find({
     _id: {
-      $in: this.items.map((itemId) => Types.ObjectId(itemId)),
+      $in: this.items.map((itemId) => Types.ObjectId(itemId._id)),
     },
+  }).select(
+    'pricePerItem quantity tax usShippingFee estWgtPerItem extraShippingCost website'
+  );
+
+  const customer = await User.findById(this.customer).select(
+    'profile.discountRates'
+  );
+
+  let totalBillUsd = 0;
+  let totalEstWgt = 0;
+  let totalShippingExtra = 0;
+  let afterDiscount = 0;
+
+  items.forEach((item) => {
+    let {
+      usShippingFee,
+      quantity,
+      pricePerItem,
+      estWgtPerItem,
+      extraShippingCost,
+      website,
+    } = item;
+    usShippingFee = parseFloat(usShippingFee.toString());
+    quantity = parseFloat(quantity.toString());
+    pricePerItem = parseFloat(pricePerItem.toString());
+    estWgtPerItem = parseFloat(estWgtPerItem.toString());
+    extraShippingCost = parseFloat(extraShippingCost.toString());
+
+    totalShippingExtra =
+      Math.round(totalShippingExtra * MUL + extraShippingCost * MUL) / MUL;
+
+    totalBillUsd =
+      Math.round(
+        totalBillUsd * MUL +
+          usShippingFee * MUL +
+          MUL *
+            pricePerItem *
+            quantity *
+            (1 + parseFloat(this.customTax!.toString()))
+      ) / MUL;
+
+    const discountRate = parseFloat(
+      customer?.profile.discountRates
+        ?.find((rate) => rate.website === website)
+        ?.rate.toString()
+    );
+    afterDiscount =
+      Math.round(
+        afterDiscount * MUL +
+          usShippingFee * MUL +
+          MUL * pricePerItem * quantity * (1 - discountRate) +
+          MUL *
+            parseFloat(this.customTax!.toString()) *
+            (usShippingFee + pricePerItem * quantity)
+      ) / MUL;
+    totalEstWgt =
+      Math.round(totalEstWgt * MUL + estWgtPerItem * quantity * MUL) / MUL;
+    console.log(totalBillUsd, parseFloat(this.customTax?.toString()));
   });
-  console.log(items);
+
+  let shippingFeeToVn;
+  if (this.shippingRateToVn.currency === 'usd') {
+    shippingFeeToVn =
+      Math.round(
+        totalEstWgt * MUL * parseFloat(this.shippingRateToVn.value.toString())
+      ) / MUL;
+  } else {
+    shippingFeeToVn =
+      Math.round(
+        totalEstWgt *
+          MUL *
+          parseFloat(this.shippingRateToVn.value.toString()) *
+          parseFloat(this.usdVndRate.toString())
+      ) / MUL;
+  }
+
+  console.log(totalBillUsd);
+  totalBillUsd =
+    Math.round(
+      totalBillUsd * MUL + shippingFeeToVn * MUL + totalShippingExtra * MUL
+    ) / MUL;
+  console.log(afterDiscount);
+
+  this.totalEstimatedWeight = totalEstWgt;
+  this.totalBillUsd = totalBillUsd;
+  this.afterDiscount = afterDiscount;
+  this.actCharge =
+    Math.round(MUL * parseFloat(this.usdVndRate.toString()) * totalBillUsd) /
+    MUL;
   next();
 });
 
-billSchema.methods.calcBill = calcBill;
+// billSchema.methods.calcBill = calcBill;
 
 export default billSchema;

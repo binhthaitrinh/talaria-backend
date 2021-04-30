@@ -18,6 +18,8 @@ export interface IBill {
   customer: string;
   items: string[];
   affiliate: string;
+  afterDiscount: number;
+  totalEstimatedWeight: number;
 }
 
 export interface IBillDocument extends IBill, Document {

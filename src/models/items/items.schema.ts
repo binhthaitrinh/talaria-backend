@@ -1,7 +1,8 @@
-import { Schema, Types } from 'mongoose';
+import { PromiseProvider, Schema, Types } from 'mongoose';
 import { IItemModel, IItemDocument } from './items.types';
 import { buy } from './items.statics';
 import { decToStr } from '../../utils';
+import { Bill } from '../bills/bills.model';
 
 const itemSchema = new Schema<IItemDocument, IItemModel>(
   {
@@ -57,6 +58,7 @@ const itemSchema = new Schema<IItemDocument, IItemModel>(
       default: 0.0,
       get: (v: Types.Decimal128) => parseFloat(v.toString()),
     },
+
     actualCost: Types.Decimal128,
     trackingLink: String,
     invoiceLink: String,
@@ -151,6 +153,16 @@ const itemSchema = new Schema<IItemDocument, IItemModel>(
 //   next();
 // });
 
+itemSchema.pre<IItemModel>(/^findOneAnd/, async function (next) {
+  const item = await this.findOne();
+  const bills = await Bill.find({ items: item._id });
+  try {
+    await bills[29]?.save();
+  } catch (err) {
+    console.log('EROR');
+    console.log(err);
+  }
+});
 itemSchema.statics.buy = buy;
 
 export default itemSchema;
