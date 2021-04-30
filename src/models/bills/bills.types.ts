@@ -26,4 +26,10 @@ export interface IBillDocument extends IBill, Document {
   calcBill: (this: IBillDocument) => Promise<IBillDocument | null>;
 }
 
-export interface IBillModel extends Model<IBillDocument> {}
+export interface IBillModel extends Model<IBillDocument> {
+  pay: (
+    this: IBillModel,
+    _id: string,
+    amount: number
+  ) => Promise<IBillDocument | null>;
+}

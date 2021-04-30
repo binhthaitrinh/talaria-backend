@@ -156,8 +156,10 @@ const itemSchema = new Schema<IItemDocument, IItemModel>(
 itemSchema.pre<IItemModel>(/^findOneAnd/, async function (next) {
   const item = await this.findOne();
   const bills = await Bill.find({ items: item._id });
+  const promises = [];
+  bills.forEach((bill) => promises.push(bill.save()));
   try {
-    await bills[29]?.save();
+    await Promise.all(promises);
   } catch (err) {
     console.log('EROR');
     console.log(err);

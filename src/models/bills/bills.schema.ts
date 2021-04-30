@@ -5,6 +5,8 @@ import { decToStr } from '../../utils';
 import { calcBill } from './bills.methods';
 import { Item } from '../items/items.model';
 import { User } from '../users/users.model';
+import AppError from '../../utils/AppError';
+import { Transaction } from '../transaction/transactions.model';
 
 const billSchema = new Schema<IBillDocument, IBillModel>(
   {
@@ -95,10 +97,9 @@ const billSchema = new Schema<IBillDocument, IBillModel>(
         ret.createdAt = decToStr(ret.createdAt, 'date');
         ret.updatedAt = decToStr(ret.updatedAt, 'date');
         ret.usdVndRate = decToStr(ret.usdVndRate, 'vnd');
-        ret.shippingRateToVn = decToStr(
-          ret.shippingRateToVn.value,
-          ret.shippingRateToVn.currency
-        );
+        ret.shippingRateToVn = ret.shippingRateToVn
+          ? decToStr(ret.shippingRateToVn.value, ret.shippingRateToVn.currency)
+          : undefined;
         ret.customTax = decToStr(ret.customTax, 'percent');
         ret.moneyReceived = decToStr(ret.moneyReceived, 'vnd');
         ret.totalBillUsd = decToStr(ret.totalBillUsd, 'usd');
@@ -124,7 +125,7 @@ billSchema.pre('save', async function (next) {
   console.log('chaging');
   const items = await Item.find({
     _id: {
-      $in: this.items.map((itemId) => Types.ObjectId(itemId._id)),
+      $in: this.items.map((item) => Types.ObjectId(item._id ? item._id : item)),
     },
   }).select(
     'pricePerItem quantity tax usShippingFee estWgtPerItem extraShippingCost website'
@@ -217,6 +218,57 @@ billSchema.pre('save', async function (next) {
     MUL;
   next();
 });
+
+billSchema.statics.pay = async function (_id, amount) {
+  if (!amount || amount < 0) {
+    throw new AppError('Please double check the amount paid!', 400);
+  }
+  const bill = await this.findOne({ _id }).select(
+    'moneyReceived actCharge status -items -customer '
+  );
+
+  if (bill?.status === 'fully-paid') {
+    throw new AppError('Bill already paid', 400);
+  }
+
+  // update moneyReceived
+  const moneyReceived =
+    Math.round(
+      parseFloat(bill!.moneyReceived.toString()) * MUL +
+        parseFloat(amount) * MUL
+    ) / MUL;
+
+  const promises = [];
+  const newBill = this.findOneAndUpdate(
+    { _id },
+    {
+      $set: {
+        moneyReceived,
+        status:
+          moneyReceived === parseFloat(bill!.actCharge.toString())
+            ? 'fully-paid'
+            : 'partially-paid',
+      },
+    },
+    { returnOriginal: false }
+  );
+
+  promises.push(newBill);
+  promises.push(
+    Transaction.create({
+      toAcct: '604fd95ca213d706709c716b',
+      amountRcved: {
+        value: amount,
+        currency: 'vnd',
+      },
+      bill: _id,
+      affiliate: bill?.affiliate._id,
+    })
+  );
+  await Promise.all(promises);
+  console.log(moneyReceived);
+  return newBill;
+};
 
 // billSchema.methods.calcBill = calcBill;
 
