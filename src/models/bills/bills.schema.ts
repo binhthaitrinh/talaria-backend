@@ -245,7 +245,7 @@ billSchema.statics.pay = async function (_id, amount) {
       $set: {
         moneyReceived,
         status:
-          moneyReceived === parseFloat(bill!.actCharge.toString())
+          moneyReceived >= parseFloat(bill!.actCharge.toString())
             ? 'fully-paid'
             : 'partially-paid',
       },
@@ -262,7 +262,6 @@ billSchema.statics.pay = async function (_id, amount) {
         currency: 'vnd',
       },
       bill: _id,
-      affiliate: bill?.affiliate._id,
     })
   );
   await Promise.all(promises);
