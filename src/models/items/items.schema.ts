@@ -144,6 +144,7 @@ const itemSchema = new Schema<IItemDocument, IItemModel>(
         ret.returnArrvlDate = decToStr(ret.returnArrvlDate, 'date');
         return ret;
       },
+      virtuals: true,
     },
   }
 );

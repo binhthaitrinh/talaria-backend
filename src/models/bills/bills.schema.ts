@@ -106,6 +106,8 @@ const billSchema = new Schema<IBillDocument, IBillModel>(
         ret.actBillCost = decToStr(ret.actBillCost, 'vnd');
         ret.actCharge = decToStr(ret.actCharge, 'vnd');
         ret.comission = decToStr(ret.commission, 'vnd');
+        ret.totalEstimatedWeight = decToStr(ret.totalEstimatedWeight, 'kg');
+        ret.afterDiscount = decToStr(ret.afterDiscount, 'usd');
       },
     },
   }
@@ -116,7 +118,7 @@ billSchema.pre<IBillDocument>(/^find/, async function (next) {
   this.populate({ path: 'affiliate', select: 'firstName lastName _id' });
   this.populate({
     path: 'items',
-    select: 'name quantity pricePerItem',
+    select: 'name quantity pricePerItem estWgtPerItem usShippingFee',
   });
   next();
 });
