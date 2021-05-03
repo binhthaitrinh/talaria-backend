@@ -13,6 +13,9 @@ import {
   getUser,
   getUsers,
   updateUser,
+  uploadUserPhoto,
+  resizeUserPhoto,
+  getProfilePic,
 } from '../controllers/userController';
 
 const userRouter = express.Router();
@@ -23,8 +26,10 @@ userRouter.post('/forgot-password', forgotPassword);
 userRouter.patch('/reset-password/:resetToken', resetPassword);
 userRouter.get('/signout', signout);
 userRouter.get('/', getUsers);
-userRouter.route('/:id').patch(updateUser).delete(deleteUser);
+userRouter.get('/images/:key', getProfilePic);
 userRouter.use(protect);
 userRouter.get('/me', protect, getMe, getUser);
+userRouter.put('/updateImage', uploadUserPhoto, resizeUserPhoto);
+userRouter.route('/:id').patch(updateUser).delete(deleteUser);
 
 export default userRouter;
