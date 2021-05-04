@@ -48,36 +48,37 @@ const upload = multer({ storage: multerStorage, fileFilter: multerFilter });
 
 export const uploadUserPhoto = upload.single('image');
 
-export const resizeUserPhoto = catchAsync(async (req, res, next) => {
-  if (!req.file) return new AppError('Please provide a picture', 400);
+export const resizeUserPhoto = catchAsync(
+  async (req: Request, res: Response, next: NextFunction) => {
+    if (!req.file) return new AppError('Please provide a picture', 400);
 
-  const filename = `${req.user._id}-${Date.now().toString()}.jpeg`;
+    const filename = `${req.user._id}-${Date.now().toString()}.jpeg`;
 
-  const result = sharp(req.file.buffer)
-    .resize(500, 500)
-    .toFormat('jpeg')
-    .jpeg({ quality: 90 });
-  // .toFile(`public/img/users/${req.file.filename}`);
+    const result = sharp(req.file.buffer)
+      .resize(500, 500)
+      .toFormat('jpeg')
+      .jpeg({ quality: 90 });
+    // .toFile(`public/img/users/${req.file.filename}`);
 
-  await uploadFile(result, filename);
-  const updatedUser = await User.findByIdAndUpdate(
-    req.user._id,
-    {
-      profilePicture: filename,
-    },
-    { returnOriginal: false }
-  );
+    await uploadFile(result, filename);
+    const updatedUser = await User.findByIdAndUpdate(
+      req.user._id,
+      {
+        profilePicture: filename,
+      },
+      { returnOriginal: false }
+    );
 
-  res.status(200).json({
-    status: 'success',
-    data: {
-      user: updatedUser,
-    },
-  });
-});
+    return res.status(200).json({
+      status: 'success',
+      data: {
+        user: updatedUser,
+      },
+    });
+  }
+);
 
-export const getProfilePic = (req, res) => {
-  console.log('gettign profile');
+export const getProfilePic = (req: Request, res: Response) => {
   const key = req.params.key;
   const readStream = getFileStream(key);
 

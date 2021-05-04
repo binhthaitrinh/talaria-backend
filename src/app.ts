@@ -11,6 +11,7 @@ import warehouseRouter from './routes/warehouseRoutes';
 import itemRouter from './routes/itemRoutes';
 import billRouter from './routes/billRoutes';
 import cors from 'cors';
+import commissionRouter from './routes/commissionRoutes';
 
 const app = express();
 
@@ -45,6 +46,7 @@ app.use('/api/v1/giftcards', giftcardRouter);
 app.use('/api/v1/warehouses', warehouseRouter);
 app.use('/api/v1/items', itemRouter);
 app.use('/api/v1/bills', billRouter);
+app.use('/api/v1/commissions', commissionRouter);
 
 app.all('*', (req, _res, next) => {
   next(new AppError(`Can't find ${req.originalUrl} on this server`, 404));

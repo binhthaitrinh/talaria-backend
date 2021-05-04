@@ -3,6 +3,7 @@ import { IBillDocument, IBillModel } from './bills.types';
 import { MUL, SHIPPING_RATE_VND, USD_VND_RATE } from '../../constants';
 import { decToStr } from '../../utils';
 import { calcBill } from './bills.methods';
+import { Commission } from '../commissions/commissions.model';
 import { Item } from '../items/items.model';
 import { User } from '../users/users.model';
 import AppError from '../../utils/AppError';
@@ -88,7 +89,7 @@ const billSchema = new Schema<IBillDocument, IBillModel>(
     affiliate: {
       type: Types.ObjectId,
       ref: 'User',
-      required: [true, 'There must be an affilaite associated with this bill'],
+      required: [true, 'There must be an affiliate associated with this bill'],
     },
   },
   {
@@ -114,17 +115,22 @@ const billSchema = new Schema<IBillDocument, IBillModel>(
 );
 
 billSchema.pre<IBillDocument>(/^find/, async function (next) {
-  this.populate({ path: 'customer', select: 'firstName lastName _id' });
-  this.populate({ path: 'affiliate', select: 'firstName lastName _id' });
+  this.populate({
+    path: 'customer',
+    select: 'firstName lastName _id',
+  });
+  this.populate({
+    path: 'affiliate',
+    select: 'firstName lastName _id profile.commissionRates',
+  });
   this.populate({
     path: 'items',
-    select: 'name quantity pricePerItem estWgtPerItem usShippingFee',
+    select: 'name quantity pricePerItem estWgtPerItem usShippingFee website',
   });
   next();
 });
 
 billSchema.pre('save', async function (next) {
-  console.log('chaging');
   const items = await Item.find({
     _id: {
       $in: this.items.map((item) => Types.ObjectId(item._id ? item._id : item)),
@@ -205,12 +211,10 @@ billSchema.pre('save', async function (next) {
       ) / MUL;
   }
 
-  console.log(totalBillUsd);
   totalBillUsd =
     Math.round(
       totalBillUsd * MUL + shippingFeeToVn * MUL + totalShippingExtra * MUL
     ) / MUL;
-  console.log(afterDiscount);
 
   this.totalEstimatedWeight = totalEstWgt;
   this.totalBillUsd = totalBillUsd;
@@ -226,8 +230,10 @@ billSchema.statics.pay = async function (_id, amount) {
     throw new AppError('Please double check the amount paid!', 400);
   }
   const bill = await this.findOne({ _id }).select(
-    'moneyReceived actCharge status -items -customer '
+    'moneyReceived actCharge status -customer'
   );
+  console.log(bill);
+  console.log(bill?.affiliate.profile.commissionRates[0]);
 
   if (bill?.status === 'fully-paid') {
     throw new AppError('Bill already paid', 400);
@@ -241,6 +247,24 @@ billSchema.statics.pay = async function (_id, amount) {
     ) / MUL;
 
   const promises = [];
+
+  // create commisson if fully paid
+  if (moneyReceived >= parseFloat(bill!.actCharge.toString())) {
+    promises.push(
+      Commission.create({
+        bill: _id,
+        affiliate: bill?.affiliate._id,
+        amount:
+          Math.round(
+            parseFloat(bill!.actCharge.toString()) *
+              MUL *
+              parseFloat(
+                bill!.affiliate.profile.commissionRates[0].rate.toString()
+              )
+          ) / MUL,
+      })
+    );
+  }
   const newBill = this.findOneAndUpdate(
     { _id },
     {
