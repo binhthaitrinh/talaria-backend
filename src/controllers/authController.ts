@@ -56,6 +56,15 @@ export const signup = catchAsync(
   }
 );
 
+export const createUser = catchAsync(
+  async (req: Request, res: Response, _next: NextFunction) => {
+    //   await User.deleteMany({});
+    const newUser = await User.create(req.body);
+    newUser.password = undefined;
+    res.status(201).json({ status: 'success', data: { user: newUser } });
+  }
+);
+
 export const signin = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
     const { email, password } = req.body;
