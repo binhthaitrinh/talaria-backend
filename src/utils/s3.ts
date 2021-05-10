@@ -7,7 +7,7 @@ const s3 = new S3({
 });
 
 // uploads a file to s3
-export function uploadFile(file, fileName) {
+export function uploadFile(file: any, fileName: any) {
   //   const fileStream = fs.createReadStream(file.path);
 
   const uploadParams = {
@@ -21,7 +21,7 @@ export function uploadFile(file, fileName) {
 exports.uploadFile = uploadFile;
 
 // downloads a file from s3
-export function getFileStream(fileKey) {
+export function getFileStream(fileKey: any) {
   const downloadParams = {
     Key: fileKey,
     Bucket: 'talaria-order',

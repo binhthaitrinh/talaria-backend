@@ -1,25 +1,25 @@
-import mongoose, { Schema } from "mongoose";
-import { decToStr } from "../../utils";
-import { IAcctDocument, IAcctModel } from "./accounts.types";
+import mongoose, { Schema } from 'mongoose';
+import { decToStr } from '../../utils';
+import { IAcctDocument, IAcctModel } from './accounts.types';
 
 const accountSchema = new Schema<IAcctDocument, IAcctModel>(
   {
     website: {
       type: String,
       enum: [
-        "amazon",
-        "sephora",
-        "ebay",
-        "bestbuy",
-        "costco",
-        "walmart",
-        "others",
+        'amazon',
+        'sephora',
+        'ebay',
+        'bestbuy',
+        'costco',
+        'walmart',
+        'others',
       ],
-      required: [true, "an account must be associated with a website"],
+      required: [true, 'an account must be associated with a website'],
     },
     name: {
       type: String,
-      required: [true, "An account must have a name"],
+      required: [true, 'An account must have a name'],
     },
     balance: {
       type: mongoose.Types.Decimal128,
@@ -28,13 +28,13 @@ const accountSchema = new Schema<IAcctDocument, IAcctModel>(
     },
     currency: {
       type: String,
-      enum: ["vnd", "usd", "btc"],
-      required: [true, "An account must have currency"],
+      enum: ['vnd', 'usd', 'btc'],
+      required: [true, 'An account must have currency'],
     },
     status: {
       type: String,
-      enum: ["active", "inactive", "disputing"],
-      default: "active",
+      enum: ['active', 'inactive', 'disputing'],
+      default: 'active',
     },
     createdAt: {
       type: Date,
@@ -51,6 +51,7 @@ const accountSchema = new Schema<IAcctDocument, IAcctModel>(
     toJSON: {
       transform: (_doc, ret) => {
         ret.balance = decToStr(ret.balance, ret.currency);
+        ret.createdAt = decToStr(ret.createdAt, 'date');
         return ret;
       },
     },

@@ -1,4 +1,4 @@
-import { Document, Model } from "mongoose";
+import { Document, Model } from 'mongoose';
 
 export interface IWarehouse {
   name: string;
@@ -9,6 +9,7 @@ export interface IWarehouse {
   zipcode: string;
   phone?: string;
   customId: string;
+  deliveredTo: string;
 }
 
 export interface IWarehouseDocument extends IWarehouse, Document {}

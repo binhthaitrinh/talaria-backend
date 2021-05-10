@@ -1,8 +1,8 @@
-import { Document, Model } from "mongoose";
+import { Document, Model } from 'mongoose';
 
 export interface IAccount {
-  accountWebsite?: string;
-  loginID: string;
+  website?: string;
+  name: string;
   teamviewInfo?: string;
   balance: number;
   currency: string;

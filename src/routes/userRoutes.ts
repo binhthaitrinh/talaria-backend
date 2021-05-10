@@ -30,6 +30,6 @@ userRouter.get('/images/:key', getProfilePic);
 userRouter.use(protect);
 userRouter.get('/me', protect, getMe, getUser);
 userRouter.patch('/updateImage', uploadUserPhoto, resizeUserPhoto);
-userRouter.route('/:id').patch(updateUser).delete(deleteUser);
+userRouter.route('/:id').patch(updateUser).delete(deleteUser).get(getUser);
 
 export default userRouter;

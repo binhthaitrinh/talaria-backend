@@ -8,6 +8,7 @@ import {
   deleteCommission,
   getMonthlyCommissions,
   payCommission,
+  paySingle,
 } from '../controllers/commissionController';
 
 const commissionRouter = express.Router();
@@ -18,6 +19,8 @@ commissionRouter
   .patch(payCommission);
 
 commissionRouter.route('/').get(getCommissions).post(createCommission);
+
+commissionRouter.route('/:id/pay').patch(paySingle);
 
 commissionRouter
   .route('/:id')

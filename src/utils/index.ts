@@ -5,9 +5,15 @@ export const decToNum = (dec: Types.Decimal128) =>
 export const decToStr = (dec: Types.Decimal128 | number, unit: string) => {
   if (dec) {
     if (unit === 'date') {
-      return new Intl.DateTimeFormat('vi-VN', {
-        dateStyle: 'medium',
-      } as any).format(new Date(dec.toString()));
+      return new Date(dec.toString()).toLocaleString('vi-VN', {
+        month: 'long',
+        year: 'numeric',
+        day: 'numeric',
+        timeZone: 'utc',
+      });
+      // return new Intl.DateTimeFormat('vi-VN', {
+      //   dateStyle: 'medium',
+      // } as any).format(new Date(dec.toString()));
     } else if (unit === 'usd' || unit === 'vnd') {
       return new Intl.NumberFormat('us-US', {
         style: 'currency',

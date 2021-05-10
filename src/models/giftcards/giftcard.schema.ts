@@ -23,14 +23,14 @@ const giftcardSchema = new mongoose.Schema<IGiftcardDocument, IGiftcardModel>(
         },
       },
       required: [true, 'There must be a price'],
-      get: (v: Types.Decimal128) => parseFloat(v.toString()),
+      // get: (v: Types.Decimal128) => parseFloat(v.toString()),
     },
 
     fee: {
       value: {
         type: mongoose.Types.Decimal128,
         default: 0.0,
-        get: (v: Types.Decimal128) => parseFloat(v.toString()),
+        // get: (v: Types.Decimal128) => parseFloat(v.toString()),
       },
       currency: {
         type: String,
@@ -149,6 +149,8 @@ giftcardSchema.pre<IGiftcardDocument>('save', async function (next) {
     return next(new AppError('cannot buy with USD yet', 400));
   }
 
+  // TODO: corner case: when not enough BTC balance in cryptos
+
   // if bought with BTC, we need to query cryptos
   try {
     const cryptos = await Crypto.find(
@@ -158,11 +160,33 @@ giftcardSchema.pre<IGiftcardDocument>('save', async function (next) {
     );
 
     if (cryptos.length <= 0) {
-      return next(new AppError('Please check if there are enough BTC', 400));
+      return next(
+        new AppError('Please check if there are enough cryptos left', 400)
+      );
     }
+
+    const totalBtcAvailable = cryptos.reduce(
+      (acc: number, current: any) =>
+        Math.round(
+          acc * MUL +
+            parseFloat(current.remainingBalance.amount.toString()) * MUL
+        ) / MUL,
+      0
+    );
 
     const totalBtcNeeded =
       Math.round(this.price.value * MUL + this.fee.value * MUL) / MUL;
+
+    console.log(totalBtcAvailable);
+
+    if (totalBtcAvailable < totalBtcNeeded) {
+      return next(
+        new AppError(
+          'Cryptos remaining balance is not enough. Consider buying more cryptos',
+          400
+        )
+      );
+    }
     let remainingBtc = totalBtcNeeded;
     let remainingGc = this.value;
     const rates = [];
@@ -180,6 +204,7 @@ giftcardSchema.pre<IGiftcardDocument>('save', async function (next) {
       const btcVndRate = parseFloat(
         curCrypto.remainingBalance.rating.toString()
       );
+
       const gcVndRate =
         Math.round((btcVndRate * MUL * totalBtcNeeded) / this.value) / MUL;
       const partialBalance =
@@ -234,7 +259,11 @@ giftcardSchema.pre<IGiftcardDocument>('save', async function (next) {
     this.partialBalance = rates;
 
     this.discountRate =
-      1 - ((this.price.value + this.fee.value) * this.btcUsdRate) / this.value;
+      1 -
+      ((parseFloat(this.price.value.toString()) +
+        parseFloat(this.fee.value.toString())) *
+        parseFloat(this.btcUsdRate.toString())) /
+        parseFloat(this.value.toString());
 
     await Promise.all(promises);
 
@@ -246,6 +275,7 @@ giftcardSchema.pre<IGiftcardDocument>('save', async function (next) {
 
 // create transaction
 giftcardSchema.pre<IGiftcardDocument>('save', async function (next) {
+  console.log('from account: ', this.fromAccount);
   try {
     const transaction = await Transaction.create({
       fromAcct: this.fromAccount,

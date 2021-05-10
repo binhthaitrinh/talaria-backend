@@ -1,8 +1,9 @@
-import { PromiseProvider, Schema, Types } from 'mongoose';
+import { Schema, Types } from 'mongoose';
 import { IItemModel, IItemDocument } from './items.types';
 import { buy } from './items.statics';
 import { decToStr } from '../../utils';
 import { Bill } from '../bills/bills.model';
+import AppError from '../../utils/AppError';
 
 const itemSchema = new Schema<IItemDocument, IItemModel>(
   {
@@ -132,7 +133,7 @@ const itemSchema = new Schema<IItemDocument, IItemModel>(
         ret.actualCost = decToStr(ret.actualCost, 'vnd');
         ret.estWgtPerItem = decToStr(ret.estWgtPerItem, 'kg');
         ret.commissionRate = decToStr(ret.commissionRate, 'percent');
-        ret.actPricePerItem = decToStr(ret.actPricePerIte, 'usd');
+        ret.actPricePerItem = decToStr(ret.actPricePerItem, 'usd');
         ret.createdAt = decToStr(ret.createdAt, 'date');
         ret.updatedAt = decToStr(ret.updatedAt, 'date');
         ret.orderDate = decToStr(ret.orderDate, 'date');
@@ -156,14 +157,35 @@ const itemSchema = new Schema<IItemDocument, IItemModel>(
 
 itemSchema.pre<IItemModel>(/^findOneAnd/, async function (next) {
   const item = await this.findOne();
-  const bills = await Bill.find({ items: item._id });
-  const promises = [];
+
+  const bills = await Bill.find({
+    items: { $elemMatch: { $eq: Types.ObjectId(item!._id) } },
+  });
+  const promises: any[] = [];
   bills.forEach((bill) => promises.push(bill.save()));
   try {
     await Promise.all(promises);
   } catch (err) {
-    console.log('EROR');
-    console.log(err);
+    return next(err);
+  }
+});
+
+itemSchema.pre<IItemModel>(/^findOneAndDelete/, async function (next) {
+  const item = await this.findOne();
+  const bills = await Bill.find({
+    items: { $elemMatch: { $eq: Types.ObjectId(item!._id) } },
+  });
+  if (bills.length !== 0) {
+    bills.forEach((bill) => {
+      if (bill.items.length >= 1) {
+        return next(
+          new AppError(
+            'the bill containing this items is not empty. Delete failed',
+            400
+          )
+        );
+      }
+    });
   }
 });
 itemSchema.statics.buy = buy;

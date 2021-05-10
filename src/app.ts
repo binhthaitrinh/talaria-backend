@@ -15,12 +15,25 @@ import commissionRouter from './routes/commissionRoutes';
 
 const app = express();
 
-const allowList = ['http://localhost:3000', 'http://localhost:5500'];
+const allowList = [
+  'http://localhost:3000',
+  'http://localhost:5500',
+  'https://talaria-web.vercel.app',
+  'talaria-web.vercel.app',
+  'https://talaria-web-5t4hmkiac-binhthaitrinh.vercel.app',
+  'talaria-web-5t4hmkiac-binhthaitrinh.vercel.app',
+];
 
 const corsOption = function (req: any, callback: any) {
   let corsOption;
   if (allowList.indexOf(req.header('Origin')) !== -1) {
-    corsOption = { origin: true, credentials: true };
+    corsOption = {
+      origin: true,
+      // process.env.NODE_ENV === 'production'
+      // ? 'https://talaria-web.vercel.app'
+      // : 'https://talaria-web.vercel.app',
+      credentials: true,
+    };
   } else {
     corsOption = { origin: false, credentials: true };
   }
@@ -28,6 +41,7 @@ const corsOption = function (req: any, callback: any) {
 };
 
 app.use(cors(corsOption));
+app.set('trust proxy', 1);
 
 app.use(express.json());
 

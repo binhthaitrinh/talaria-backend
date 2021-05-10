@@ -24,7 +24,6 @@ export interface IGiftcard {
   transaction?: string;
   fromAccount: string;
   toAccount: string;
-  bill: string;
 }
 
 export interface IGiftcardDocument extends IGiftcard, Document {}

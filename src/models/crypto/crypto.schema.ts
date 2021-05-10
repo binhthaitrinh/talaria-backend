@@ -77,7 +77,7 @@ const cryptoSchema = new Schema<ICryptoDocument, ICryptoModel>(
           ? decToStr(ret.moneySpent.value, ret.moneySpent.currency)
           : undefined;
         ret.usdVndRate = decToStr(ret.usdVndRate, 'vnd');
-        ret.btcUsdRate = decToStr(ret.btcUsdRate, 'btc');
+        ret.btcUsdRate = decToStr(ret.btcUsdRate, 'usd');
         return ret;
       },
     },

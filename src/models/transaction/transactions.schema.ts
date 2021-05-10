@@ -1,7 +1,7 @@
-import mongoose, { Schema } from "mongoose";
-import { ITransactionDocument, ITransactionModel } from "./transactions.types";
-import AppError from "../../utils/AppError";
-import { Account } from "../accounts/accounts.model";
+import mongoose, { Schema } from 'mongoose';
+import { ITransactionDocument, ITransactionModel } from './transactions.types';
+import AppError from '../../utils/AppError';
+import { Account } from '../accounts/accounts.model';
 
 const transactionSchema = new Schema<ITransactionDocument, ITransactionModel>({
   createdAt: {
@@ -13,7 +13,7 @@ const transactionSchema = new Schema<ITransactionDocument, ITransactionModel>({
     value: mongoose.Types.Decimal128,
     currency: {
       type: String,
-      enum: ["vnd", "usd", "btc"],
+      enum: ['vnd', 'usd', 'btc'],
     },
   },
   // sentFee: {
@@ -27,7 +27,7 @@ const transactionSchema = new Schema<ITransactionDocument, ITransactionModel>({
     value: mongoose.Types.Decimal128,
     currency: {
       type: String,
-      enum: ["vnd", "usd", "btc"],
+      enum: ['vnd', 'usd', 'btc'],
     },
   },
   fromBal: mongoose.Types.Decimal128,
@@ -35,23 +35,23 @@ const transactionSchema = new Schema<ITransactionDocument, ITransactionModel>({
   notes: String,
   item: {
     type: mongoose.Types.ObjectId,
-    ref: "Item",
+    ref: 'Item',
   },
   bill: {
     type: mongoose.Types.ObjectId,
-    ref: "Bill",
+    ref: 'Bill',
   },
   affiliate: {
     type: mongoose.Types.ObjectId,
-    ref: "User",
+    ref: 'User',
   },
   fromAcct: {
     type: mongoose.Types.ObjectId,
-    ref: "Account",
+    ref: 'Account',
   },
   toAcct: {
     type: mongoose.Types.ObjectId,
-    ref: "Account",
+    ref: 'Account',
   },
 });
 
@@ -81,7 +81,8 @@ const transactionSchema = new Schema<ITransactionDocument, ITransactionModel>({
 //   }
 // }
 
-transactionSchema.pre<ITransactionDocument>("save", async function (next) {
+transactionSchema.pre<ITransactionDocument>('save', async function (next) {
+  console.log(this);
   if (this.fromAcct) {
     try {
       const fromAcct = await Account.findOneAndUpdate(
@@ -104,7 +105,7 @@ transactionSchema.pre<ITransactionDocument>("save", async function (next) {
       if (!fromAcct) {
         return next(
           new AppError(
-            "Please check the account to withdraw money from again!",
+            'Please check the account to withdraw money from again!',
             400
           )
         );
@@ -134,7 +135,7 @@ transactionSchema.pre<ITransactionDocument>("save", async function (next) {
       if (!toAcct) {
         return next(
           new AppError(
-            "Please check the account to deposit money to again!",
+            'Please check the account to deposit money to again!',
             400
           )
         );

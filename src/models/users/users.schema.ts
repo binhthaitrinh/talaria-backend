@@ -120,7 +120,6 @@ const userSchema = new Schema<IUserDocument, IUserModel>(
       customerType: {
         type: String,
         enum: ['wholesale', 'personal'],
-        default: 'personal',
       },
       address: [
         {
@@ -152,9 +151,6 @@ const userSchema = new Schema<IUserDocument, IUserModel>(
     toJSON: {
       transform: (_doc, ret) => {
         ret.createdAt = decToStr(ret.createdAt, 'date');
-        if (ret.profile) {
-          ret.profile.dob = decToStr(ret.profile.dob, 'date');
-        }
         return ret;
       },
     },

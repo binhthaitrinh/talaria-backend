@@ -1,5 +1,7 @@
 import { Document, Model } from 'mongoose';
 import { MoneyType } from '../../types';
+import { IItemDocument } from '../items/items.types';
+import { IUserDocument } from '../users/users.types';
 
 export interface IBill {
   createdAt: number;
@@ -16,8 +18,8 @@ export interface IBill {
   paymentReceipt?: string;
   notes?: string;
   customer: string;
-  items: string[];
-  affiliate: string;
+  items: string[] | IItemDocument[];
+  affiliate: string & IUserDocument;
   afterDiscount: number;
   totalEstimatedWeight: number;
 }

@@ -27,7 +27,7 @@ export const updateUser = factory.updateOne(User);
 
 export const deleteUser = catchAsync(
   async (req: Request, res: Response, _next: NextFunction) => {
-    const user = await User.findByIdAndUpdate(
+    await User.findByIdAndUpdate(
       req.params.id,
       { active: false },
       { returnOriginal: false }
@@ -36,7 +36,7 @@ export const deleteUser = catchAsync(
   }
 );
 
-const multerFilter = (req, file, cb) => {
+const multerFilter = (_req: any, file: any, cb: any) => {
   if (file.mimetype.startsWith('image')) {
     cb(null, true);
   } else {
@@ -49,7 +49,11 @@ const upload = multer({ storage: multerStorage, fileFilter: multerFilter });
 export const uploadUserPhoto = upload.single('image');
 
 export const resizeUserPhoto = catchAsync(
-  async (req: Request, res: Response, next: NextFunction) => {
+  async (
+    req: Request & { user: { _id: string } },
+    res: Response,
+    _next: NextFunction
+  ) => {
     if (!req.file) return new AppError('Please provide a picture', 400);
 
     const filename = `${req.user._id}-${Date.now().toString()}.jpeg`;

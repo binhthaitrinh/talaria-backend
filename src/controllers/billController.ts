@@ -1,6 +1,5 @@
 import { NextFunction, Response, Request } from 'express';
 import { Bill } from '../models/bills/bills.model';
-import AppError from '../utils/AppError';
 import { catchAsync } from '../utils/catchAsync';
 import * as factory from './handleFactory';
 

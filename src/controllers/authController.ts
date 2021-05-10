@@ -1,12 +1,12 @@
-import { NextFunction, Request, Response } from "express";
-import jwt from "jsonwebtoken";
-import { IUserDocument } from "src/models/users/users.types";
-import { User } from "../models/users/users.model";
-import AppError from "../utils/AppError";
-import { catchAsync } from "../utils/catchAsync";
-import { v4 } from "uuid";
-import { FORGOT_PASSWORD_PREFIX } from "../constants";
-import { Email } from "../utils/sendEmail";
+import { NextFunction, Request, Response } from 'express';
+import jwt from 'jsonwebtoken';
+import { IUserDocument } from 'src/models/users/users.types';
+import { User } from '../models/users/users.model';
+import AppError from '../utils/AppError';
+import { catchAsync } from '../utils/catchAsync';
+import { v4 } from 'uuid';
+import { FORGOT_PASSWORD_PREFIX } from '../constants';
+import { Email } from '../utils/sendEmail';
 
 const signToken = (id: string) => {
   return jwt.sign({ id }, <string>process.env.JWT_SECRET, {
@@ -26,14 +26,21 @@ const createSendToken = (
         parseInt(process.env.JWT_COOKIE_EXPIRES_IN!) * 24 * 60 * 60 * 1000
     ),
     // only send cookie on https
-    secure: process.env.NODE_ENV === "production" ? true : false,
+    // secure: process.env.NODE_ENV === 'production' ? true : false,
+    secure: true,
     httpOnly: true,
+    // sameSite: 'none',
+    // domain:
+    //   // process.env.NODE_ENV === 'prodution'
+    //   // '.talaria-web.vercel.app',
+
+    //   undefined,
   };
 
-  res.cookie("jwt", token, cookieOptions);
+  res.cookie('jwt', token, cookieOptions);
   user.password = undefined;
   res.status(statusCode).json({
-    status: "success",
+    status: 'success',
     token,
     data: {
       user,
@@ -52,21 +59,23 @@ export const signup = catchAsync(
 export const signin = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
     const { email, password } = req.body;
+    console.log('CALLED');
+    console.log(email, password);
 
     if (!email || !password) {
-      return next(new AppError("Please provide email and password", 400));
+      return next(new AppError('Please provide email and password', 400));
     }
 
     // get user based on email
     const user = await User.findOne({ email: req.body.email }).select(
-      "+password"
+      '+password'
     );
 
     // compare inputted password with password from db
     const correct = await user?.comparePassword(password);
 
     if (!correct) {
-      return next(new AppError("Invalid credentials", 401));
+      return next(new AppError('Invalid credentials', 401));
     }
 
     // by this point, everything is OK
@@ -85,7 +94,7 @@ export const forgotPassword = catchAsync(
     // handle error if no user found
     if (!user) {
       return next(
-        new AppError("There is no user with this email address", 404)
+        new AppError('There is no user with this email address', 404)
       );
     }
 
@@ -97,32 +106,32 @@ export const forgotPassword = catchAsync(
     await redisClient.set(
       `${FORGOT_PASSWORD_PREFIX}${resetToken}`,
       user._id,
-      "ex",
+      'ex',
       1000 * 60 * 60 * 24 * 3
     );
 
     const resetUrl = `${req.protocol}://${req.get(
-      "host"
+      'host'
     )}/api/v1/users/reset-password/${resetToken}`;
     const message = `Forgot your password? Go to this url: ${resetUrl}`;
 
     try {
       await new Email(user, resetUrl).send(
-        "default",
-        "Reset Password",
+        'default',
+        'Reset Password',
         message
       );
 
       res.status(200).json({
-        status: "success",
-        message: "Reset password URL sent to email!",
+        status: 'success',
+        message: 'Reset password URL sent to email!',
       });
     } catch (err) {
       console.log(err);
       await redisClient.del(`${FORGOT_PASSWORD_PREFIX}${resetToken}`);
       return next(
         new AppError(
-          "There was an error sending email. Please try again later",
+          'There was an error sending email. Please try again later',
           500
         )
       );
@@ -136,7 +145,7 @@ export const resetPassword = catchAsync(
     const { password } = req.body;
 
     if (!password) {
-      return next(new AppError("please provide new password", 401));
+      return next(new AppError('please provide new password', 401));
     }
     const { resetToken } = req.params;
     const userId = await redisClient.get(
@@ -144,7 +153,7 @@ export const resetPassword = catchAsync(
     );
     const user = await User.findById(userId);
     if (!user) {
-      return next(new AppError("Token is invalid or has expired", 400));
+      return next(new AppError('Token is invalid or has expired', 400));
     }
 
     user.password = password;
@@ -163,11 +172,11 @@ export const protect = catchAsync(
     _res: Response,
     next: NextFunction
   ) => {
-    console.log("CALLED");
+    console.log('CALLED');
     var token;
     console.log(req.headers.authorization);
-    if (req.headers.authorization?.startsWith("Bearer")) {
-      token = req.headers.authorization.split(" ")[1];
+    if (req.headers.authorization?.startsWith('Bearer')) {
+      token = req.headers.authorization.split(' ')[1];
     } else if (req.cookies?.jwt) {
       token = req.cookies.jwt;
     }
@@ -175,7 +184,7 @@ export const protect = catchAsync(
     // user not logged in
     if (!token) {
       return next(
-        new AppError("You are not logged in. Please log in to get access", 401)
+        new AppError('You are not logged in. Please log in to get access', 401)
       );
     }
 
@@ -191,7 +200,7 @@ export const protect = catchAsync(
     const user = await User.findById(decoded.id);
     if (!user) {
       return next(
-        new AppError("The user belonging to this token no longer exists", 401)
+        new AppError('The user belonging to this token no longer exists', 401)
       );
     }
 
@@ -204,13 +213,13 @@ export const protect = catchAsync(
 );
 
 export const signout = (_req: Request, res: Response) => {
-  res.cookie("jwt", "loggedout", {
+  res.cookie('jwt', 'loggedout', {
     // cookie expire in 10s
     expires: new Date(Date.now() + 10 * 1000),
     httpOnly: true,
   });
 
   res.status(200).json({
-    status: "success",
+    status: 'success',
   });
 };

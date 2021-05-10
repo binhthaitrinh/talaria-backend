@@ -1,4 +1,4 @@
-import { IBillDocument, IBillModel } from './bills.types';
+import { IBillDocument } from './bills.types';
 
 export async function calcBill(this: IBillDocument) {
   console.log(this);

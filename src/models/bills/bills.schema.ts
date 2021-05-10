@@ -2,7 +2,6 @@ import { Types, Schema } from 'mongoose';
 import { IBillDocument, IBillModel } from './bills.types';
 import { MUL, SHIPPING_RATE_VND, USD_VND_RATE } from '../../constants';
 import { decToStr } from '../../utils';
-import { calcBill } from './bills.methods';
 import { Commission } from '../commissions/commissions.model';
 import { Item } from '../items/items.model';
 import { User } from '../users/users.model';
@@ -133,11 +132,15 @@ billSchema.pre<IBillDocument>(/^find/, async function (next) {
 billSchema.pre('save', async function (next) {
   const items = await Item.find({
     _id: {
-      $in: this.items.map((item) => Types.ObjectId(item._id ? item._id : item)),
+      $in: this.items.map((item: any) =>
+        Types.ObjectId(item._id ? item._id : item)
+      ),
     },
   }).select(
     'pricePerItem quantity tax usShippingFee estWgtPerItem extraShippingCost website'
   );
+
+  //TODO: Handle case when delete last item in bill
 
   const customer = await User.findById(this.customer).select(
     'profile.discountRates'
@@ -176,11 +179,17 @@ billSchema.pre('save', async function (next) {
             (1 + parseFloat(this.customTax!.toString()))
       ) / MUL;
 
-    const discountRate = parseFloat(
-      customer?.profile.discountRates
-        ?.find((rate) => rate.website === website)
-        ?.rate.toString()
-    );
+    if (!customer) {
+      throw new AppError('no customter found', 404);
+    }
+
+    const discountRate =
+      parseFloat(
+        customer.profile
+          .discountRates!.find((rate) => rate.website === website)!
+          .rate.toString()
+      ) || 0.08;
+
     afterDiscount =
       Math.round(
         afterDiscount * MUL +
@@ -192,7 +201,7 @@ billSchema.pre('save', async function (next) {
       ) / MUL;
     totalEstWgt =
       Math.round(totalEstWgt * MUL + estWgtPerItem * quantity * MUL) / MUL;
-    console.log(totalBillUsd, parseFloat(this.customTax?.toString()));
+    // console.log(totalBillUsd, parseFloat(this.customTax?.toString()));
   });
 
   let shippingFeeToVn;
@@ -232,8 +241,8 @@ billSchema.statics.pay = async function (_id, amount) {
   const bill = await this.findOne({ _id }).select(
     'moneyReceived actCharge status -customer'
   );
-  console.log(bill);
-  console.log(bill?.affiliate.profile.commissionRates[0]);
+  // console.log(bill);
+  // console.log(bill?.affiliate.profile.commissionRates[0]);
 
   if (bill?.status === 'fully-paid') {
     throw new AppError('Bill already paid', 400);
@@ -259,7 +268,7 @@ billSchema.statics.pay = async function (_id, amount) {
             parseFloat(bill!.actCharge.toString()) *
               MUL *
               parseFloat(
-                bill!.affiliate.profile.commissionRates[0].rate.toString()
+                bill!.affiliate!.profile.commissionRates![0].rate.toString()
               )
           ) / MUL,
       })
@@ -290,7 +299,7 @@ billSchema.statics.pay = async function (_id, amount) {
       bill: _id,
     })
   );
-  await Promise.all(promises);
+  await Promise.all(promises as any);
   console.log(moneyReceived);
   return newBill;
 };

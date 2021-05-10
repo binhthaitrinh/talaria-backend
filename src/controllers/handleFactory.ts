@@ -56,13 +56,19 @@ export const getAll = (Model: Model<any>, options?: any) => {
         .limitFields()
         .paginate();
 
+      const count = new APIFeatures(Model.find(options || {}), req.query)
+        .filter()
+        .sort()
+        .limitFields();
+
       const docs = await features.query;
-      const count = await Model.find().countDocuments();
+
+      const counts = await count.query;
 
       res.status(200).json({
         status: 'success',
         data: {
-          totalCount: count,
+          totalCount: counts.length,
           data: docs,
         },
       });
