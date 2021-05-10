@@ -1,6 +1,6 @@
-import redis, { Redis } from "ioredis";
+import redis, { Redis } from 'ioredis';
 
-global.redisClient = new redis();
+global.redisClient = new redis(process.env.REDIS_URL || undefined);
 
 declare global {
   namespace NodeJS {

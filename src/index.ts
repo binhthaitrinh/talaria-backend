@@ -1,18 +1,18 @@
-import redis, { Redis } from "ioredis";
-import dotenv from "dotenv";
-import mongoose from "mongoose";
-import app from "./app";
+import redis, { Redis } from 'ioredis';
+import dotenv from 'dotenv';
+import mongoose from 'mongoose';
+import app from './app';
 dotenv.config();
 
-process.on("uncaughtException", (err: Error) => {
+process.on('uncaughtException', (err: Error) => {
   console.error(err.name, err.message);
-  console.log("UNCAUGHT EXCEPTION. SHUTTING DOWN...");
+  console.log('UNCAUGHT EXCEPTION. SHUTTING DOWN...');
   process.exit(1);
 });
 
 const DB: string = <string>(
   process.env.MONGO_URI?.replace(
-    "<PASSWORD>",
+    '<PASSWORD>',
     process.env.MONGO_PASSWORD as string
   )
 );
@@ -24,7 +24,7 @@ mongoose
     useCreateIndex: true,
     useFindAndModify: false,
   })
-  .then((_) => console.log("DB connection successful..."))
+  .then((_) => console.log('DB connection successful...'))
   .catch((err) => console.log(err));
 
 const PORT = process.env.PORT || 4444;
@@ -33,15 +33,15 @@ const server = app.listen(PORT, () => {
   console.log(`Listening on port ${PORT}`);
 });
 
-process.on("unhandledRejection", (err: Error) => {
+process.on('unhandledRejection', (err: Error) => {
   console.error(err.name, err.message);
-  console.log("UNHANDLER REJECTION! Shutting down...");
+  console.log('UNHANDLER REJECTION! Shutting down...');
   server.close(() => {
     process.exit(1);
   });
 });
 
-global.redisClient = new redis();
+global.redisClient = new redis(process.env.REDIS_URL || undefined);
 
 declare global {
   namespace NodeJS {
