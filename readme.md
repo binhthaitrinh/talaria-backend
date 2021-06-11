@@ -18,12 +18,6 @@ Features in progress:
 - Send email
 - Security: encryption, sanitization, rate limiting, etc.
 
-## Project Screen Shot(s)
-
-![Login screen](images/photo1.PNG)
-![Items screen](images/photo2.PNG)
-![Profile screen](images/photo3.PNG)
-
 ## Installation and Setup Instructions
 
 Clone down this repository. You will need `node` and `npm` installed globally on your machine.
@@ -36,9 +30,11 @@ To Start Server:
 
 `npm start`
 
-To Visit App:
+To Test API:
 
-`localhost:4444/api/v1`
+`localhost:4444/api/v1/*`
+
+Eg: `GET localhost:4444/api/v1/items`: return all items
 
 ## Overall architecture
 
