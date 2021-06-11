@@ -15,7 +15,7 @@ const commissionSchema = new Schema<IComissionDocument, ICommissionModel>(
     },
     affiliate: {
       type: Types.ObjectId,
-      ref: 'Affiliate',
+      ref: 'User',
     },
     amount: {
       type: Types.Decimal128,
@@ -36,5 +36,14 @@ const commissionSchema = new Schema<IComissionDocument, ICommissionModel>(
     },
   }
 );
+
+commissionSchema.pre<IComissionDocument>(/^find/, async function (next) {
+  this.populate({
+    path: 'affiliate',
+    select: 'firstName lastName _id profilePicture',
+  });
+
+  next();
+});
 
 export default commissionSchema;

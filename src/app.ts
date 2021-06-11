@@ -12,6 +12,8 @@ import itemRouter from './routes/itemRoutes';
 import billRouter from './routes/billRoutes';
 import cors from 'cors';
 import commissionRouter from './routes/commissionRoutes';
+import manageRouter from './routes/manageRoutes';
+import transactionRouter from './routes/transactionRoutes';
 
 const app = express();
 
@@ -22,6 +24,7 @@ const allowList = [
   'talaria-web.vercel.app',
   'https://talaria-web-5t4hmkiac-binhthaitrinh.vercel.app',
   'talaria-web-5t4hmkiac-binhthaitrinh.vercel.app',
+  'https://talaria-order.xyz',
 ];
 
 const corsOption = function (req: any, callback: any) {
@@ -61,6 +64,8 @@ app.use('/api/v1/warehouses', warehouseRouter);
 app.use('/api/v1/items', itemRouter);
 app.use('/api/v1/bills', billRouter);
 app.use('/api/v1/commissions', commissionRouter);
+app.use('/api/v1/manage', manageRouter);
+app.use('/api/v1/transactions', transactionRouter);
 
 app.all('*', (req, _res, next) => {
   next(new AppError(`Can't find ${req.originalUrl} on this server`, 404));

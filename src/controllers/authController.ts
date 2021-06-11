@@ -29,6 +29,8 @@ const createSendToken = (
     // secure: process.env.NODE_ENV === 'production' ? true : false,
     secure: true,
     httpOnly: true,
+    domain:
+      process.env.NODE_ENV === 'production' ? '.talaria-order.xyz' : undefined,
     // sameSite: 'none',
     // domain:
     //   // process.env.NODE_ENV === 'prodution'
@@ -226,6 +228,8 @@ export const signout = (_req: Request, res: Response) => {
     // cookie expire in 10s
     expires: new Date(Date.now() + 10 * 1000),
     httpOnly: true,
+    domain:
+      process.env.NODE_ENV === 'production' ? '.talaria-order.xyz' : undefined,
   });
 
   res.status(200).json({

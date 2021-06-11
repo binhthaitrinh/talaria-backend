@@ -150,12 +150,12 @@ const itemSchema = new Schema<IItemDocument, IItemModel>(
   }
 );
 
-// itemSchema.pre<IItemDocument>("save", async function (next) {
-//   this.actPricePerItem = this.pricePerItem;
-//   next();
-// });
+itemSchema.pre<IItemDocument>('save', async function (next) {
+  this.actPricePerItem = this.pricePerItem;
+  next();
+});
 
-itemSchema.pre<IItemModel>(/^findOneAnd/, async function (next) {
+itemSchema.post<IItemModel>(/^findOneAnd/, async function (next) {
   const item = await this.findOne();
 
   const bills = await Bill.find({

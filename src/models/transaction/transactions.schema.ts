@@ -55,6 +55,19 @@ const transactionSchema = new Schema<ITransactionDocument, ITransactionModel>({
   },
 });
 
+transactionSchema.pre<ITransactionDocument>(/^find/, async function (next) {
+  this.populate({
+    path: 'fromAcct',
+    select: 'name currency',
+  });
+  this.populate({
+    path: 'toAcct',
+    select: 'name currency',
+  });
+
+  next();
+});
+
 // async function updateAcct(
 //   id: string,
 //   amount: MoneyType,

@@ -137,8 +137,19 @@ billSchema.pre('save', async function (next) {
       ),
     },
   }).select(
-    'pricePerItem quantity tax usShippingFee estWgtPerItem extraShippingCost website'
+    'pricePerItem quantity tax usShippingFee estWgtPerItem extraShippingCost website actualCost'
   );
+
+  const itemsActualCost = items.reduce((accumulator, item) => {
+    if (item.actualCost) {
+      const currentActualCost = parseFloat(item.actualCost.toString()) || 0;
+      return Math.round(MUL * accumulator + currentActualCost * MUL) / MUL;
+    }
+    return 0;
+  }, 0);
+
+  this.actBillCost = itemsActualCost;
+  console.log('ACT BILL COST: ', this.actBillCost);
 
   //TODO: Handle case when delete last item in bill
 

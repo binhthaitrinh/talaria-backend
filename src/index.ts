@@ -1,6 +1,7 @@
 import redis, { Redis } from 'ioredis';
 import dotenv from 'dotenv';
 import mongoose from 'mongoose';
+import 'dotenv-safe/config';
 import app from './app';
 dotenv.config();
 
@@ -27,7 +28,7 @@ mongoose
   .then((_) => console.log('DB connection successful...'))
   .catch((err) => console.log(err));
 
-const PORT = process.env.PORT || 4444;
+const PORT = parseInt(process.env.PORT) || 4444;
 
 const server = app.listen(PORT, () => {
   console.log(`Listening on port ${PORT}`);
